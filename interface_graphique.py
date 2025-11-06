@@ -3,18 +3,6 @@ import sys
 import random
 import os
 
-"""
-# == Importation des images
-images_pieces = {
-    "Vault": pygame.image.load(os.path.join("images", "vault.png")),
-    "Veranda": pygame.image.load(os.path.join("images", "veranda.png")),
-    "Entrance Hall": pygame.image.load(os.path.join("images", "entrance_hall.png")),
-    "Pantry": pygame.image.load(os.path.join("images", "pantry.png")),
-    "Corridor": pygame.image.load(os.path.join("images", "corridor.png")),
-    "Chapel": pygame.image.load(os.path.join("images", "chapel.png")),
-    "Bedroom": pygame.image.load(os.path.join("images", "bedroom.png")),
-}"""
-
 # === CONFIGURATION ===
 ROWS, COLS = 9, 5  # Dimensions correctes du manoir
 TILE_SIZE = 100
@@ -45,19 +33,26 @@ pygame.display.set_caption("Blue Prince - Interface")
 clock = pygame.time.Clock()
 font = pygame.font.SysFont(None, 24)
 
-# == Charger les images ==
+# === CHARGEMENT DES IMAGES ===
+# (utilise un dossier "images" dans le même répertoire que ton script)
+def charger_image(nom_fichier):
+    chemin = os.path.join("images", nom_fichier)
+    if os.path.exists(chemin):
+        return pygame.image.load(chemin)
+    return None  # Si le fichier n’existe pas, on évite une erreur
+
 images_pieces = {
-    "Vault": pygame.image.load("vault.png"),
-    "Veranda": pygame.image.load("veranda.png"),
-    "Bedroom": pygame.image.load("bedroom.png"),
-    "Corridor": pygame.image.load("corridor.png"),
-    "Chapel": pygame.image.load("chapel.png"),
-    "Pantry": pygame.image.load("pantry.png"),
-    "Entrance Hall": pygame.image.load("entrance_hall.png")
+    "Vault": charger_image("vault.png"),
+    "Veranda": charger_image("veranda.png"),
+    "Bedroom": charger_image("bedroom.png"),
+    "Corridor": charger_image("corridor.png"),
+    "Chapel": charger_image("chapel.png"),
+    "Pantry": charger_image("pantry.png"),
+    "Entrance Hall": charger_image("entrance_hall.png")
 }
 
 # === ÉTAT DU JEU ===
-player_pos = [4, 4]
+player_pos = [4, 2]  # milieu visuel de la grille
 grid = [[None for _ in range(COLS)] for _ in range(ROWS)]
 grid[player_pos[0]][player_pos[1]] = {"nom": "Entrance Hall", "couleur": "bleue"}
 
@@ -86,6 +81,7 @@ catalogue_pieces = [
     {"nom": "Pantry", "couleur": "bleue", "gemmes": 0, "rarete": 0},
 ]
 
+# === FONCTIONS ===
 def tirer_pieces(catalogue, n=3):
     pieces_disponibles = []
     for piece in catalogue:
@@ -105,7 +101,6 @@ def tirer_pieces(catalogue, n=3):
 
     return tirage
 
-# === AFFICHAGE ===
 def draw_grid():
     for row in range(ROWS):
         for col in range(COLS):
@@ -117,7 +112,8 @@ def draw_grid():
             if piece:
                 image = images_pieces.get(piece["nom"])
                 if image:
-                    screen.blit(pygame.transform.scale(image, (TILE_SIZE, TILE_SIZE)), (x, y))
+                    image_scaled = pygame.transform.scale(image, (TILE_SIZE, TILE_SIZE))
+                    screen.blit(image_scaled, (x, y))
                 else:
                     color = PIECE_COLORS.get(piece["couleur"], GRAY)
                     pygame.draw.rect(screen, color, rect)
@@ -151,13 +147,11 @@ def draw_selection_menu():
         pygame.draw.rect(screen, GRAY, rect)
         pygame.draw.rect(screen, RED if i == index_selection else BLACK, rect, 2)
 
-        # Image de la pièce
         image = images_pieces.get(piece["nom"])
         if image:
             img_scaled = pygame.transform.scale(image, (80, 80))
             screen.blit(img_scaled, (x_base + 10, y + 10))
 
-        # Texte descriptif
         nom = font.render(piece["nom"], True, BLACK)
         gemmes = font.render(f"{piece['gemmes']} gemmes", True, BLACK)
         rarete = font.render(f"Rareté: {piece['rarete']}", True, BLACK)
@@ -189,9 +183,9 @@ while True:
 
         elif event.type == pygame.KEYDOWN:
             if choix_en_cours:
-                if event.key == pygame.K_LEFT:
+                if event.key == pygame.K_UP:
                     index_selection = (index_selection - 1) % 3
-                elif event.key == pygame.K_RIGHT:
+                elif event.key == pygame.K_DOWN:
                     index_selection = (index_selection + 1) % 3
                 elif event.key == pygame.K_RETURN:
                     piece_choisie = pieces_proposees[index_selection]
