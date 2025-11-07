@@ -11,7 +11,7 @@ def creer_salles_bleues():
             rarete=0, 
             condition_placement="Aucune",
             porte={"N": True, "S": True, "E": False, "O": False}, 
-            objet=[], 
+            objets_initiaux=[], 
             effet=None),
 
         Salle(

@@ -9,7 +9,7 @@ class Salle:
     Utilité: regrouper les variables pour décrire une pièce et le traitement associé aux pièces.
     """
     
-    def __init__(self, nom: str, couleur: str,image_path: str, cout: int, rarete: int, condition_placement: str, porte: dict, objet: list = None, effet: str = None):
+    def __init__(self, nom: str, couleur: str,image_path: str, cout: int, rarete: int, condition_placement: str, porte: dict, objets_initiaux: list = None, effet: str = None):
         """
         Initialisation d'une salle
         
@@ -20,7 +20,7 @@ class Salle:
         * rarete: rareté de la pièce (entier entre 0 et 3)
         * condition_placement: condition sur le placement de la pièce dans le mamoir si besoin
         * porte: porte disponible (ou non) dans la pièce
-        * objet: objet contenu dans la pièce
+        * objets initiaux: objets contenu dans la pièce
         * effet: effet spécial de la pièce
         """
         
@@ -31,7 +31,7 @@ class Salle:
         self.rarete = rarete
         self.condition_placement = condition_placement
         self.porte = porte
-        self.objet = objet if objet is not None else []
+        self.objets_initiaux = objets_initiaux if objets_initiaux is not None else []
         self.effet = effet
 
         self.position = None

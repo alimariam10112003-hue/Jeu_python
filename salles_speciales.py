@@ -16,7 +16,7 @@ class EntranceHall(Salle):
             rarete=0,
             condition_placement="Premiere_Piece", 
             porte={"N": True, "S": True, "E": True, "O": True},
-            objet=[],
+            objets_initiaux=[],
             effet=None
         )
 
@@ -34,7 +34,7 @@ class Antechamber(Salle):
             rarete=3,
             condition_placement="Derniere_Piece", 
             porte={"N": False, "S": True, "E": False, "O": False},
-            objet=[],
+            objets_initiaux=[],
             effet="Victoire"
         )
     
