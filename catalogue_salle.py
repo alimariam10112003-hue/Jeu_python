@@ -33,7 +33,7 @@ def creer_salles_bleues():
             rarete=0,
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": False, "O": False}, 
-            objets=["Banane", "Key"],
+            objets_initiaux=["Banane", "Key"],
             effet="Contient 2 objets aléatoire"),
 
         
@@ -45,7 +45,7 @@ def creer_salles_bleues():
             rarete=0, 
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": False, "O": True}, 
-            objets=["Key", "Gem", "Coin"], 
+            objets_initiaux=["Key", "Gem", "Coin"], 
             effet="Contient 1 key, 1 gem et 1 coin",)
 
         Salle(
@@ -56,7 +56,7 @@ def creer_salles_bleues():
             rarete=0, 
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": False, "O": True}, 
-            objets=["4 Coins", "Random Food"], 
+            objets_initiaux=["4 Coins", "Random Food"], 
             effet="Contient 4 Coins et 1 objet Nourriture.",)
         
         # 4 de rareté 1
@@ -68,7 +68,7 @@ def creer_salles_bleues():
             rarete=1, 
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": False, "O": True}, 
-            objets=["Redbul"], 
+            objets_initiaux=["Redbul"], 
             effet=None,)
 
         
@@ -92,7 +92,7 @@ def creer_salles_bleues():
             rarete=1, 
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": False, "O": True}, 
-            objets=["Redbul"], 
+            objets_initiaux=["Redbul"], 
             effet=None,)
 
         Salle(
@@ -115,7 +115,7 @@ def creer_salles_bleues():
             rarete=2, 
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": False, "O": True}, 
-            objets=["Key"], 
+            objets_initiaux=["Key"], 
             effet=None,)
 
         Salle(
