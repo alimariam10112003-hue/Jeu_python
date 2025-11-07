@@ -348,4 +348,61 @@ def creer_salles_viollette():
             porte={"N": False, "S": True, "E": False, "O": False}, 
             objets_initiaux=["Key ou Nourriture"], 
             effet="Gagne aléatoirement des pas",)]  
-    ]
+    
+def creer_salles_orange():
+    salles_bleues = [
+        Salle(
+            nom="Hallway",
+            couleur="orange",
+            image_path="img/hallway.png", 
+            cout=0,
+            rarete=0, 
+            condition_placement="Aucune",
+            porte={"N": False, "S": True, "E": True, "O": True}, 
+            objets_initiaux=[], 
+            effet="Les portes sont toujours déverrouillées",)
+
+        Salle(
+            nom="West Wing Hall",
+            couleur="orange",
+            image_path="img/west_wing_hall.png", 
+            cout=0,
+            rarete=1, 
+            condition_placement="Aucune",
+            porte={"N": False, "S": True, "E": True, "O": True}, 
+            objets_initiaux=[], 
+            effet="Les portes sont toujours déverrouillées",)
+
+        
+        Salle(
+            nom="Corridor",
+            couleur="orange",
+            image_path="img/corridor.png", 
+            cout=0,
+            rarete=0, 
+            condition_placement="Aucune",
+            porte={"N": True, "S": True, "E": False, "O": False}, 
+            objets_initiaux=[], 
+            effet="les pièces sont toujours déverrouillées",)
+
+        Salle(
+            nom="Passageway",
+            couleur="orange",
+            image_path="img/passageway.png", 
+            cout=2,
+            rarete=1, 
+            condition_placement="Aucune",
+            porte={"N": True, "S": True, "E": True, "O": True}, 
+            objets_initiaux=["Key ou Nourriture"], 
+            effet="Les portes sont toujours déverrouillées",)
+
+        Salle(
+            nom="Great Hall",
+            couleur="orange",
+            image_path="img/great_hall.png", 
+            cout=0,
+            rarete=3, 
+            condition_placement="Aucune",
+            porte={"N": True, "S": True, "E": True, "O": True}, 
+            objets_initiaux=[], 
+            effet="Contient 7 portes toujours verouillées. Toutes les portes sont déverouillées si le Foyer est dans le Manoir",)]  
