@@ -161,7 +161,7 @@ def creer_salles_bleues():
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": False, "O": True}, 
             objets_initiaux=[], 
-            effet="Récompense en fonction du nombre de trophées collectés."",)
+            effet="Récompense en fonction du nombre de trophées collectés.",)
 
         Salle(
             nom="Vault",
@@ -229,4 +229,64 @@ def creer_salles_bleues():
             condition_placement="",
             porte={"N": False, "S": True, "E": False, "O": True}, 
             objets_initiaux=[""], 
-            effet="",)
+            effet="",)]
+
+
+def creer_salles_verte():
+    salles_bleues = [
+        Salle(
+            nom="Terrace",
+            couleur="verte",
+            image_path="img/terrace.png", 
+            cout=0,
+            rarete=1, 
+            condition_placement="Aucune",
+            porte={"N": False, "S": True, "E": False, "O": False}, 
+            objets_initiaux=["Items random"], 
+            effet="Rend toutes les salles vertes gratuites à tirer.",)
+
+        Salle(
+            nom="Patio",
+            couleur="verte",
+            image_path="img/patio.png", 
+            cout=1,
+            rarete=1, 
+            condition_placement="Aucune",
+            porte={"N": False, "S": True, "E": False, "O": True}, 
+            objets_initiaux=["Trou à Creuser"], 
+            effet="Disperse 3 coins aléatoirement dans des salles découvertes",)
+
+        
+        Salle(
+            nom="Courtyard",
+            couleur="verte",
+            image_path="img/courtyard.png", 
+            cout=1,
+            rarete=1, 
+            condition_placement="Aucune",
+            porte={"N": False, "S": True, "E": True, "O": True}, 
+            objets_initiaux=["Trou à Creuser","Items random"], 
+            effet="Permet d'échnange 1 coin contre 1 gemme avec l'arrosoir",)
+
+        Salle(
+            nom="Cloister",
+            couleur="verte",
+            image_path="img/cloister.png", 
+            cout=4,
+            rarete=3, 
+            condition_placement="Centre du Manoir",
+            porte={"N": True, "S": True, "E": True, "O": True}, 
+            objets_initiaux=["Puzzle"], 
+            effet="Coût réduit à 9 si la pièce Terrace est présente",)
+
+        Salle(
+            nom="Veranda",
+            couleur="verte",
+            image_path="img/veranda.png", 
+            cout=2,
+            rarete=3, 
+            condition_placement="",
+            porte={"N": True, "S": True, "E": False, "O": False}, 
+            objets_initiaux=["Items random"], 
+            effet="Augmente la probabilité de trouver des objets dans les pièces vertes suivante",)]  
+    ]
