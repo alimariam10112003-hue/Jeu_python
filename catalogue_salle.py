@@ -59,9 +59,9 @@ def creer_salles_bleues():
             objets=["4 Coins", "Random Food"], 
             effet="Contient 4 Coins et 1 objet Nourriture.",)
         
-        # 5 de rareté 1
+        # 4 de rareté 1
         Salle(
-            nom="Laboratoryr",
+            nom="Laboratory",
             couleur="bleue",
             image_path="img/laboratory.png", 
             cout=1,
@@ -83,39 +83,28 @@ def creer_salles_bleues():
             objets_initiaux=["8 coins"], 
             effet="Alzara: 1 coin contre une prédiction sur l'avenir ",)
 
-        Salle(
-            nom="",
-            couleur="",
-            image_path="img/.png", 
-            cout=,
-            rarete=, 
-            condition_placement="",
-            porte={"N": False, "S": True, "E": False, "O": True}, 
-            objets_initiaux=[""], 
-            effet="",)
-
         
         Salle(
-            nom="",
-            couleur="",
-            image_path="img/.png", 
-            cout=,
-            rarete=, 
-            condition_placement="",
+            nom="Laboratory",
+            couleur="bleue",
+            image_path="img/laboratory.png", 
+            cout=1,
+            rarete=1, 
+            condition_placement="Aucune",
             porte={"N": False, "S": True, "E": False, "O": True}, 
-            objets_initiaux=[""], 
-            effet="",)
+            objets=["Redbul"], 
+            effet=None,)
 
         Salle(
-            nom="",
-            couleur="",
-            image_path="img/.png", 
-            cout=,
-            rarete=, 
+            nom="Walk-in Closet",
+            couleur="bleue",
+            image_path="img/walk_in_closet.png", 
+            cout=1,
+            rarete=1, 
             condition_placement="",
-            porte={"N": False, "S": True, "E": False, "O": True}, 
-            objets_initiaux=[""], 
-            effet="",)
+            porte={"N": False, "S": True, "E": False, "O": False}, 
+            objets_initiaux=["Casiers"], 
+            effet="Casiers avec des consommables. Risque élevé de perdre 10 pas à l'entrée",)
 
         # 5 de rareté 2
         Salle(
@@ -174,62 +163,53 @@ def creer_salles_bleues():
             objets_initiaux=["40 coins"], 
             effet="Contient des coffres",)
         
-        # 5 de rareté 3
+        # 4 de rareté 3
         Salle(
-            nom="",
-            couleur="",
-            image_path="img/.png", 
-            cout=,
-            rarete=, 
-            condition_placement="",
-            porte={"N": False, "S": True, "E": False, "O": True}, 
-            objets_initiaux=[""], 
-            effet="",)
+            nom="Conference Room",
+            couleur="bleue",
+            image_path="img/conference_room.png", 
+            cout=0,
+            rarete=3, 
+            condition_placement="Aucune",
+            porte={"N": False, "S": True, "E": True, "O": True}, 
+            objets_initiaux=[], 
+            effet="Les objets dispercées dans le Manoir sont regroupés ici à la place",)
 
         Salle(
-            nom="",
-            couleur="",
-            image_path="img/.png", 
-            cout=,
-            rarete=, 
-            condition_placement="",
+            nom="Garage",
+            couleur="bleue",
+            image_path="img/garage.png", 
+            cout=1,
+            rarete=3, 
+            condition_placement="Aucune",
             porte={"N": False, "S": True, "E": False, "O": True}, 
-            objets_initiaux=[""], 
-            effet="",)
+            objets_initiaux=["Tank"], 
+            effet="L'utilisation du véhicule donne un hammer mais coûte des pas",)
 
         
         Salle(
-            nom="",
-            couleur="",
-            image_path="img/.png", 
-            cout=,
-            rarete=, 
-            condition_placement="",
-            porte={"N": False, "S": True, "E": False, "O": True}, 
-            objets_initiaux=[""], 
-            effet="",)
+            nom="Conference Room",
+            couleur="bleue",
+            image_path="img/conference_room.png", 
+            cout=0,
+            rarete=3, 
+            condition_placement="Aucune",
+            porte={"N": False, "S": True, "E": True, "O": True}, 
+            objets_initiaux=[], 
+            effet="Les objets dispercées dans le Manoir sont regroupés ici à la place",)
+
 
         Salle(
-            nom="",
-            couleur="",
-            image_path="img/.png", 
-            cout=,
-            rarete=, 
+            nom="Wine cellar",
+            couleur="bleue",
+            image_path="img/wine_cellar.png", 
+            cout=0,
+            rarete=3, 
             condition_placement="",
-            porte={"N": False, "S": True, "E": False, "O": True}, 
-            objets_initiaux=[""], 
-            effet="",)
-
-        Salle(
-            nom="",
-            couleur="",
-            image_path="img/.png", 
-            cout=,
-            rarete=, 
-            condition_placement="",
-            porte={"N": False, "S": True, "E": False, "O": True}, 
-            objets_initiaux=[""], 
-            effet="",)]
+            porte={"N": False, "S": True, "E": False, "O": False}, 
+            objets_initiaux=["Wine bottles"], 
+            effet="Le joueur peut consommer du vin. Chaque consommation côut 3 pas et donne 1 coin",)
+]
 
 
 def creer_salles_verte():
