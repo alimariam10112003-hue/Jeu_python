@@ -24,7 +24,7 @@ def creer_salles_bleues():
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": False, "O": True}, 
             objets_initiaux=["Wind-up Key"], 
-            effet="Puzzle: Gagne 3 gemmes en résolvant le puzzle",)
+            effet="Puzzle: Gagne 3 gemmes en résolvant le puzzle"),
 
         Salle(
             nom="Closet",
@@ -47,7 +47,7 @@ def creer_salles_bleues():
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": False, "O": True}, 
             objets_initiaux=["Key", "Gem", "Coin"], 
-            effet="Contient 1 key, 1 gem et 1 coin",)
+            effet="Contient 1 key, 1 gem et 1 coin"),
 
         Salle(
             nom="Pantry",
@@ -58,7 +58,7 @@ def creer_salles_bleues():
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": False, "O": True}, 
             objets_initiaux=["4 Coins", "Random Food"], 
-            effet="Contient 4 Coins et 1 objet Nourriture.",)
+            effet="Contient 4 Coins et 1 objet Nourriture."),
         
         # 4 de rareté 1
         Salle(
@@ -70,7 +70,7 @@ def creer_salles_bleues():
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": False, "O": True}, 
             objets_initiaux=["Redbul"], 
-            effet=None,)
+            effet=None),
 
         
         Salle(
@@ -82,7 +82,7 @@ def creer_salles_bleues():
             condition_placement="Aucune",
             porte={"N": True, "S": True, "E": False, "O": False}, 
             objets_initiaux=["8 coins"], 
-            effet="Alzara: 1 coin contre une prédiction sur l'avenir ",)
+            effet="Alzara: 1 coin contre une prédiction sur l'avenir "),
 
         
         Salle(
@@ -94,7 +94,7 @@ def creer_salles_bleues():
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": False, "O": True}, 
             objets_initiaux=["Redbul"], 
-            effet=None,)
+            effet=None),
 
         Salle(
             nom="Walk-in Closet",
@@ -105,7 +105,7 @@ def creer_salles_bleues():
             condition_placement="",
             porte={"N": False, "S": True, "E": False, "O": False}, 
             objets_initiaux=["Casiers"], 
-            effet="Casiers avec des consommables. Risque élevé de perdre 10 pas à l'entrée",)
+            effet="Casiers avec des consommables. Risque élevé de perdre 10 pas à l'entrée"),
 
         # 5 de rareté 2
         Salle(
@@ -117,7 +117,7 @@ def creer_salles_bleues():
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": False, "O": True}, 
             objets_initiaux=["Key"], 
-            effet=None,)
+            effet=None),
 
         Salle(
             nom="Rotunda",
@@ -128,7 +128,7 @@ def creer_salles_bleues():
             condition_placement="Centrale",
             porte={"N": True, "S": True, "E": True, "O": True}, 
             objets_initiaux=[], 
-            effet="Rotation de la pièce",)
+            effet="Rotation de la pièce"),
 
         Salle(
             nom="Attic",
@@ -139,7 +139,7 @@ def creer_salles_bleues():
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": False, "O": False}, 
             objets_initiaux=["8 items random"], 
-            effet="Contient 8 objets aléatoire",)
+            effet="Contient 8 objets aléatoire"),
 
         
         Salle(
@@ -151,7 +151,7 @@ def creer_salles_bleues():
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": False, "O": True}, 
             objets_initiaux=[], 
-            effet="Récompense en fonction du nombre de trophées collectés.",)
+            effet="Récompense en fonction du nombre de trophées collectés."),
 
         Salle(
             nom="Vault",
@@ -162,7 +162,7 @@ def creer_salles_bleues():
             condition_placement="",
             porte={"N": False, "S": True, "E": False, "O": False}, 
             objets_initiaux=["40 coins"], 
-            effet="Contient des coffres",)
+            effet="Contient des coffres"),
         
         # 4 de rareté 3
         Salle(
@@ -174,7 +174,7 @@ def creer_salles_bleues():
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": True, "O": True}, 
             objets_initiaux=[], 
-            effet="Les objets dispercées dans le Manoir sont regroupés ici à la place",)
+            effet="Les objets dispercées dans le Manoir sont regroupés ici à la place"),
 
         Salle(
             nom="Garage",
@@ -185,7 +185,7 @@ def creer_salles_bleues():
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": False, "O": True}, 
             objets_initiaux=["Tank"], 
-            effet="L'utilisation du véhicule donne un hammer mais coûte des pas",)
+            effet="L'utilisation du véhicule donne un hammer mais coûte des pas"),
 
         
         Salle(
@@ -197,7 +197,7 @@ def creer_salles_bleues():
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": True, "O": True}, 
             objets_initiaux=[], 
-            effet="Les objets dispercées dans le Manoir sont regroupés ici à la place",)
+            effet="Les objets dispercées dans le Manoir sont regroupés ici à la place"),
 
 
         Salle(
@@ -209,7 +209,7 @@ def creer_salles_bleues():
             condition_placement="",
             porte={"N": False, "S": True, "E": False, "O": False}, 
             objets_initiaux=["Wine bottles"], 
-            effet="Le joueur peut consommer du vin. Chaque consommation côut 3 pas et donne 1 coin",)
+            effet="Le joueur peut consommer du vin. Chaque consommation côut 3 pas et donne 1 coin"),
 ]
 
 
@@ -224,7 +224,7 @@ def creer_salles_verte():
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": False, "O": False}, 
             objets_initiaux=["Items random"], 
-            effet="Rend toutes les salles vertes gratuites à tirer.",)
+            effet="Rend toutes les salles vertes gratuites à tirer."),
 
         Salle(
             nom="Patio",
@@ -235,7 +235,7 @@ def creer_salles_verte():
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": False, "O": True}, 
             objets_initiaux=["Trou à Creuser"], 
-            effet="Disperse 3 coins aléatoirement dans des salles découvertes",)
+            effet="Disperse 3 coins aléatoirement dans des salles découvertes"),
 
         
         Salle(
@@ -247,7 +247,7 @@ def creer_salles_verte():
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": True, "O": True}, 
             objets_initiaux=["Trou à Creuser","Items random"], 
-            effet="Permet d'échnange 1 coin contre 1 gemme avec l'arrosoir",)
+            effet="Permet d'échnange 1 coin contre 1 gemme avec l'arrosoir"),
 
         Salle(
             nom="Cloister",
@@ -258,7 +258,7 @@ def creer_salles_verte():
             condition_placement="Centre du Manoir",
             porte={"N": True, "S": True, "E": True, "O": True}, 
             objets_initiaux=["Puzzle"], 
-            effet="Coût réduit à 9 si la pièce Terrace est présente",)
+            effet="Coût réduit à 9 si la pièce Terrace est présente"),
 
         Salle(
             nom="Veranda",
@@ -269,8 +269,7 @@ def creer_salles_verte():
             condition_placement="",
             porte={"N": True, "S": True, "E": False, "O": False}, 
             objets_initiaux=["Items random"], 
-            effet="Augmente la probabilité de trouver des objets dans les pièces vertes suivante",)]  
-    ]
+            effet="Augmente la probabilité de trouver des objets dans les pièces vertes suivante"),]  
 
 def creer_salles_viollette():
     salles_viollette = [
@@ -283,7 +282,7 @@ def creer_salles_viollette():
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": False, "O": True}, 
             objets_initiaux=["Items food random"], 
-            effet="Gagne aléatoirement 1 à 5 pas.",)
+            effet="Gagne aléatoirement 1 à 5 pas."),
 
         Salle(
             nom="Boudoir",
@@ -294,7 +293,7 @@ def creer_salles_viollette():
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": False, "O": True}, 
             objets_initiaux=["Coffre fort à code"], 
-            effet="Ouverture du coffre fort donne des gems aléatoirement entre 1 et 3",)
+            effet="Ouverture du coffre fort donne des gems aléatoirement entre 1 et 3"),
 
         
         Salle(
@@ -306,7 +305,7 @@ def creer_salles_viollette():
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": False, "O": False}, 
             objets_initiaux=["Items food random"], 
-            effet="Permet de gagner un dé à l'entrée",)
+            effet="Permet de gagner un dé à l'entrée"),
 
         Salle(
             nom="Nursery",
@@ -317,7 +316,7 @@ def creer_salles_viollette():
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": False, "O": False}, 
             objets_initiaux=["Key ou Nourriture"], 
-            effet="Gagne aléatoirement des pas",)
+            effet="Gagne aléatoirement des pas"),
 
         Salle(
             nom="Nursery",
@@ -328,7 +327,7 @@ def creer_salles_viollette():
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": False, "O": False}, 
             objets_initiaux=["Key ou Nourriture"], 
-            effet="Gagne aléatoirement des pas",)]  
+            effet="Gagne aléatoirement des pas"),]  
     
 def creer_salles_orange():
     salles_orange = [
@@ -341,7 +340,7 @@ def creer_salles_orange():
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": True, "O": True}, 
             objets_initiaux=[], 
-            effet="Les portes sont toujours déverrouillées",)
+            effet="Les portes sont toujours déverrouillées"),
 
         Salle(
             nom="West Wing Hall",
@@ -352,7 +351,7 @@ def creer_salles_orange():
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": True, "O": True}, 
             objets_initiaux=[], 
-            effet="Les portes sont toujours déverrouillées",)
+            effet="Les portes sont toujours déverrouillées"),
 
         
         Salle(
@@ -364,7 +363,7 @@ def creer_salles_orange():
             condition_placement="Aucune",
             porte={"N": True, "S": True, "E": False, "O": False}, 
             objets_initiaux=[], 
-            effet="les pièces sont toujours déverrouillées",)
+            effet="les pièces sont toujours déverrouillées"),
 
         Salle(
             nom="Passageway",
@@ -375,7 +374,7 @@ def creer_salles_orange():
             condition_placement="Aucune",
             porte={"N": True, "S": True, "E": True, "O": True}, 
             objets_initiaux=["Key ou Nourriture"], 
-            effet="Les portes sont toujours déverrouillées",)
+            effet="Les portes sont toujours déverrouillées"),
 
         Salle(
             nom="Great Hall",
@@ -386,7 +385,7 @@ def creer_salles_orange():
             condition_placement="Aucune",
             porte={"N": True, "S": True, "E": True, "O": True}, 
             objets_initiaux=[], 
-            effet="Contient 7 portes toujours verouillées. Toutes les portes sont déverouillées si le Foyer est dans le Manoir",)]  
+            effet="Contient 7 portes toujours verouillées. Toutes les portes sont déverouillées si le Foyer est dans le Manoir"),]  
 
 def creer_salles_jaune():
     salles_jaune = [
@@ -399,7 +398,7 @@ def creer_salles_jaune():
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": False, "O": True}, 
             objets_initiaux=["Vente de key et item"], 
-            effet="Permet d'aquérir des items ou keys contre des coins",)
+            effet="Permet d'aquérir des items ou keys contre des coins"),
 
         Salle(
             nom="Kitchen",
@@ -410,7 +409,7 @@ def creer_salles_jaune():
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": False, "O": True}, 
             objets_initiaux=["Vente food"], 
-            effet="Permet d'aquérir des items food contre des coins",)
+            effet="Permet d'aquérir des items food contre des coins"),
 
         
         Salle(
@@ -422,7 +421,7 @@ def creer_salles_jaune():
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": False, "O": False}, 
             objets_initiaux=["Vente key et lockpick kits"], 
-            effet="Permet d'aquérir des keys ou des kits de crochetage",)
+            effet="Permet d'aquérir des keys ou des kits de crochetage"),
 
         Salle(
             nom="Showroom",
@@ -433,7 +432,7 @@ def creer_salles_jaune():
             condition_placement="Aucune",
             porte={"N": True, "S": True, "E": False, "O": False}, 
             objets_initiaux=["Vente items permanents"], 
-            effet="Permet d'aquérir des items permanents",)
+            effet="Permet d'aquérir des items permanents"),
 
         Salle(
             nom="Bookshop",
@@ -444,7 +443,7 @@ def creer_salles_jaune():
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": False, "O": True}, 
             objets_initiaux=["Vente books"], 
-            effet="Permet d'acquérir des livres",)]  
+            effet="Permet d'acquérir des livres"),]  
 
 def creer_salles_rouge():
     salles_rouge = [
@@ -457,7 +456,7 @@ def creer_salles_rouge():
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": False, "O": False}, 
             objets_initiaux=["Random key ou food item"], 
-            effet="Peut donner des pas ou des dés",)
+            effet="Peut donner des pas ou des dés"),
 
         Salle(
             nom="Chapel",
@@ -468,7 +467,7 @@ def creer_salles_rouge():
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": True, "O": True}, 
             objets_initiaux=[], 
-            effet="Perd 1 coin à chaque entrée. Briser l'hôtel permets de récupérer les coins perdus (usage unique) ",)
+            effet="Perd 1 coin à chaque entrée. Briser l'hôtel permets de récupérer les coins perdus (usage unique) "),
 
         
         Salle(
@@ -480,7 +479,7 @@ def creer_salles_rouge():
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": True, "O": True}, 
             objets_initiaux=[], 
-            effet="Perte de 5 pas à chaque entrée dans la salle. Peut contenir une key ou un dé",)
+            effet="Perte de 5 pas à chaque entrée dans la salle. Peut contenir une key ou un dé"),
 
         Salle(
             nom="Weight Room",
@@ -491,7 +490,7 @@ def creer_salles_rouge():
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": False, "O": True}, 
             objets_initiaux=[], 
-            effet="Permet d'échanger 5 pas cpntre 1 dé. Perte de la moitié des pas",)
+            effet="Permet d'échanger 5 pas cpntre 1 dé. Perte de la moitié des pas"),
 
         Salle(
             nom="Furnace",
@@ -502,4 +501,4 @@ def creer_salles_rouge():
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": False, "O": True}, 
             objets_initiaux=["Vente books"], 
-            effet="Augmente la probabilité de tirer d'autres salles rouge",)]  
+            effet="Augmente la probabilité de tirer d'autres salles rouge"),]  
