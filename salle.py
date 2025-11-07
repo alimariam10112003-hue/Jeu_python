@@ -9,14 +9,14 @@ class Salle:
     Utilité: regrouper les variables pour décrire une pièce et le traitement associé aux pièces.
     """
     
-    def __init__(self, nom: str, couleur: str,image_path: str, cout: int, rarete: int, condition_placement: str, porte: dict, objets_initiaux: list = None, effet: str = None):
+    def __init__(self, nom: str, couleur: str,image_path: str, cout_gem: int, rarete: int, condition_placement: str, porte: dict, objets_initiaux: list = None, effet: str = None):
         """
         Initialisation d'une salle
         
         * nom: nom de la pièce
         * couleur: couleur de la pièce (jaune,verte,violette,orange,rouge,bleu)
         * image_path: chemin de l'image de la pièce
-        * cout: coût en gemme de de la pièce 
+        * cout_gem: coût en gemme de de la pièce 
         * rarete: rareté de la pièce (entier entre 0 et 3)
         * condition_placement: condition sur le placement de la pièce dans le mamoir si besoin
         * porte: porte disponible (ou non) dans la pièce
@@ -27,7 +27,7 @@ class Salle:
         self.nom = nom
         self.couleur = couleur
         self.image_path = image_path
-        self.cout = cout
+        self.cout_gem = cout_gem
         self.rarete = rarete
         self.condition_placement = condition_placement
         self.porte = porte
