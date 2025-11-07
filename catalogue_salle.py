@@ -290,3 +290,62 @@ def creer_salles_verte():
             objets_initiaux=["Items random"], 
             effet="Augmente la probabilité de trouver des objets dans les pièces vertes suivante",)]  
     ]
+
+def creer_salles_viollette():
+    salles_bleues = [
+        Salle(
+            nom="Bedroom",
+            couleur="viollette",
+            image_path="img/bedroom.png", 
+            cout=0,
+            rarete=1, 
+            condition_placement="Aucune",
+            porte={"N": False, "S": True, "E": False, "O": True}, 
+            objets_initiaux=["Items food random"], 
+            effet="Gagne aléatoirement 1 à 5 pas.",)
+
+        Salle(
+            nom="Boudoir",
+            couleur="viollette",
+            image_path="img/boudoir.png", 
+            cout=0,
+            rarete=2, 
+            condition_placement="Aucune",
+            porte={"N": False, "S": True, "E": False, "O": True}, 
+            objets_initiaux=["Coffre fort à code"], 
+            effet="Ouverture du coffre fort donne des gems aléatoirement entre 1 et 3",)
+
+        
+        Salle(
+            nom="Guest Bedroom",
+            couleur="viollette",
+            image_path="img/guest_bedroom.png", 
+            cout=0,
+            rarete=1, 
+            condition_placement="Aucune",
+            porte={"N": False, "S": True, "E": False, "O": False}, 
+            objets_initiaux=["Items food random"], 
+            effet="Permet de gagner un dé à l'entrée",)
+
+        Salle(
+            nom="Nursery",
+            couleur="viollette",
+            image_path="img/nursery.png", 
+            cout=1,
+            rarete=0, 
+            condition_placement="Aucune",
+            porte={"N": False, "S": True, "E": False, "O": False}, 
+            objets_initiaux=["Key ou Nourriture"], 
+            effet="Gagne aléatoirement des pas",)
+
+        Salle(
+            nom="Nursery",
+            couleur="viollette",
+            image_path="img/nursery.png", 
+            cout=1,
+            rarete=0, 
+            condition_placement="Aucune",
+            porte={"N": False, "S": True, "E": False, "O": False}, 
+            objets_initiaux=["Key ou Nourriture"], 
+            effet="Gagne aléatoirement des pas",)]  
+    ]
