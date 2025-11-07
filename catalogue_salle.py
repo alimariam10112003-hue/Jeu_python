@@ -233,7 +233,7 @@ def creer_salles_bleues():
 
 
 def creer_salles_verte():
-    salles_bleues = [
+    salles_verte = [
         Salle(
             nom="Terrace",
             couleur="verte",
@@ -292,7 +292,7 @@ def creer_salles_verte():
     ]
 
 def creer_salles_viollette():
-    salles_bleues = [
+    salles_viollette = [
         Salle(
             nom="Bedroom",
             couleur="viollette",
@@ -350,7 +350,7 @@ def creer_salles_viollette():
             effet="Gagne aléatoirement des pas",)]  
     
 def creer_salles_orange():
-    salles_bleues = [
+    salles_orange = [
         Salle(
             nom="Hallway",
             couleur="orange",
@@ -406,3 +406,61 @@ def creer_salles_orange():
             porte={"N": True, "S": True, "E": True, "O": True}, 
             objets_initiaux=[], 
             effet="Contient 7 portes toujours verouillées. Toutes les portes sont déverouillées si le Foyer est dans le Manoir",)]  
+
+def creer_salles_jaune():
+    salles_jaune = [
+        Salle(
+            nom="Commissary",
+            couleur="jaune",
+            image_path="img/commissary.png", 
+            cout=1,
+            rarete=1, 
+            condition_placement="Aucune",
+            porte={"N": False, "S": True, "E": False, "O": True}, 
+            objets_initiaux=["Vente de key et item"], 
+            effet="Permet d'aquérir des items ou keys contre des coins",)
+
+        Salle(
+            nom="Kitchen",
+            couleur="jaune",
+            image_path="img/kitchen.png", 
+            cout=1,
+            rarete=1, 
+            condition_placement="Aucune",
+            porte={"N": False, "S": True, "E": False, "O": True}, 
+            objets_initiaux=["Vente food"], 
+            effet="Permet d'aquérir des items food contre des coins",)
+
+        
+        Salle(
+            nom="Locksmith",
+            couleur="jaune",
+            image_path="img/locksmith.png", 
+            cout=1,
+            rarete=3, 
+            condition_placement="Aucune",
+            porte={"N": False, "S": True, "E": False, "O": False}, 
+            objets_initiaux=["Vente key et lockpick kits"], 
+            effet="Permet d'aquérir des keys ou des kits de crochetage",)
+
+        Salle(
+            nom="Showroom",
+            couleur="jaune",
+            image_path="img/showroom.png", 
+            cout=2,
+            rarete=2, 
+            condition_placement="Aucune",
+            porte={"N": True, "S": True, "E": False, "O": False}, 
+            objets_initiaux=["Vente items permanents"], 
+            effet="Permet d'aquérir des items permanents",)
+
+        Salle(
+            nom="Bookshop",
+            couleur="jaune",
+            image_path="img/bookshop.png", 
+            cout=1,
+            rarete=3, 
+            condition_placement="Aucune",
+            porte={"N": False, "S": True, "E": False, "O": True}, 
+            objets_initiaux=["Vente books"], 
+            effet="Permet d'acquérir des livres",)]  
