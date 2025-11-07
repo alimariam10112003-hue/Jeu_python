@@ -464,3 +464,61 @@ def creer_salles_jaune():
             porte={"N": False, "S": True, "E": False, "O": True}, 
             objets_initiaux=["Vente books"], 
             effet="Permet d'acquérir des livres",)]  
+
+def creer_salles_rouge():
+    salles_rouge = [
+        Salle(
+            nom="Lavatory",
+            couleur="rouge",
+            image_path="img/lavatory.png", 
+            cout=0,
+            rarete=1, 
+            condition_placement="Aucune",
+            porte={"N": False, "S": True, "E": False, "O": False}, 
+            objets_initiaux=["Random key ou food item"], 
+            effet="Peut donner des pas ou des dés",)
+
+        Salle(
+            nom="Chapel",
+            couleur="rouge",
+            image_path="img/chapel.png", 
+            cout=0,
+            rarete=0, 
+            condition_placement="Aucune",
+            porte={"N": False, "S": True, "E": True, "O": True}, 
+            objets_initiaux=[], 
+            effet="Perd 1 coin à chaque entrée. Briser l'hôtel permets de récupérer les coins perdus (usage unique) ",)
+
+        
+        Salle(
+            nom="Gymnasium",
+            couleur="rouge",
+            image_path="img/gymnasium.png", 
+            cout=0,
+            rarete=1, 
+            condition_placement="Aucune",
+            porte={"N": False, "S": True, "E": True, "O": True}, 
+            objets_initiaux=[], 
+            effet="Perte de 5 pas à chaque entrée dans la salle. Peut contenir une key ou un dé",)
+
+        Salle(
+            nom="Weight Room",
+            couleur="rouge",
+            image_path="img/weight_room.png", 
+            cout=0,
+            rarete=2, 
+            condition_placement="Aucune",
+            porte={"N": False, "S": True, "E": False, "O": True}, 
+            objets_initiaux=[], 
+            effet="Permet d'échanger 5 pas cpntre 1 dé. Perte de la moitié des pas",)
+
+        Salle(
+            nom="Furnace",
+            couleur="rouge",
+            image_path="img/furnace.png", 
+            cout=0,
+            rarete=2, 
+            condition_placement="Aucune",
+            porte={"N": False, "S": True, "E": False, "O": True}, 
+            objets_initiaux=["Vente books"], 
+            effet="Augmente la probabilité de tirer d'autres salles rouge",)]  
