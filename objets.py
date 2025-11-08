@@ -21,7 +21,6 @@ PERMANENT_VALEURS = {
 }
 
 # Définition de la classe des objets du jeu (en fonction des salles)
-
 class Objet:
     def __init__(self, nom: str, description: str):
         self.nom = nom
@@ -110,7 +109,6 @@ def lot_coins(quantite: int) -> list[Coin]:
     """Crée une liste d'instances de Coin."""
     return [Coin() for _ in range(quantite)]
 
-# --- CORRECTION DE LA LOGIQUE DANS CETTE FONCTION ---
 def creer_nourriture_specifique(nom: str) -> Nourriture:
     """Instance de Nourriture """
     pas_rendus = NOURRITURE_VALEURS.get(nom, 0)
