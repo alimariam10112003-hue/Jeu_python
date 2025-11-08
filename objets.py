@@ -30,6 +30,49 @@ class Objet:
         """Intéraction du joueur avec l'objet"""
         print(f"Interaction avec l'objet : {self.nom}")
 
+        # Définition d'abord des malus
+        if self.nom == "Chapel":
+            joueur.inventaire.retirer_coin(1) 
+            print("Malus: Vous perdez 1 Coin.")
+            
+        elif self.nom == "Gymnasium":
+            joueur.inventaire.depenser_pas(5)
+            print("Malus: Vous perdez 5 Pas.")
+
+        # Définition des bonus
+        elif self.nom == "Bedroom":
+            pas_gagnes = random.randint(1, 5) 
+            joueur.inventaire.gagner_pas(pas_gagnes)
+            print(f"Bonus: Vous regagnez {pas_gagnes}.")
+            
+        elif self.nom == "Wine cellar":
+            pass
+            
+        elif self.nom == "Ballroom":
+            joueur.inventaire.gemmes = 2
+            print("Effet: Votre compte de Gemmes est réinitialisé à 2.")
+
+        objets_a_retirer = []
+        for objet in self.objets:
+            if isinstance(objet, Cle):
+                joueur.inventaire.gagner_clé(1)
+                objets_a_retirer.append(objet)
+                print(f"Objet ramassé: {objet.nom}")
+                
+            elif isinstance(objet, Nourriture):
+                objet.utiliser(joueur)
+                objets_a_retirer.append(objet)
+                print(f"Nourriture utilisée: {objet.nom}")
+            
+            elif isinstance(objet, Permanent):
+                objet.ramasser(joueur)
+                objets_a_retirer.append(objet) 
+                
+            elif isinstance(objet, Interactif):
+                print(f"Élément interactif trouvé: {objet.nom}.")
+                
+        self.objets = [i for i in self.objets if i not in objets_a_retirer]
+
 class Consommable(Objet):
     """Objet rétiré de l'inventaire après son utilisation/consommation"""
     def __init__(self, nom: str, description: str):
