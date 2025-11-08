@@ -20,11 +20,11 @@ class Porte:
         - niveau 3 : double tour => 1 key
         """
         # Rangée Entrance Hall toujours de niveau 0
-        if rangee_destination == 0:
+        if rangee_destination == 8:
             return 0
         
         # Rangée Entrance Hall toujours de niveau 2
-        if rangee_destination == 8:
+        if rangee_destination == 0:
             return 2
 
         # Rangées intermédiaires => aléatoire
@@ -37,7 +37,7 @@ class Porte:
 
         """
 
-        if self.ouverte:
+        if self.est_ouverte:
             return True
         elif self.niveau_verrouillage == 0:
             return True 
@@ -60,7 +60,7 @@ class Porte:
         """
         if self.est_ouverte:
             return True
-        elif self.ouvrir(joueur):
+        elif self.ressource_ouvrir(joueur):
             if self.niveau_verrouillage == 1:
                 if joueur.inventaire.possede_kit_crochetage():
                     pass 
