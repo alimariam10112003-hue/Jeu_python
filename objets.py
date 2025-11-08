@@ -1,5 +1,6 @@
 import random
 
+
 # Dictionnaire de la nourriture
 NOURRITURE_VALEURS = {
     "Pomme": 2,
@@ -49,7 +50,7 @@ class Objet:
             pass
             
         elif self.nom == "Ballroom":
-            joueur.inventaire.gemmes = 2
+            joueur.inventaire.gem = 2
             print("Effet: Votre compte de Gemmes est réinitialisé à 2.")
 
         objets_a_retirer = []
