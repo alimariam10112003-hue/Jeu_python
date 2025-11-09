@@ -1,0 +1,275 @@
+import pygame
+import sys
+import random
+import os
+import copy
+
+# === CONFIGURATION DE BASE ===
+ROWS, COLS = 9, 5  # taille du manoir (lignes, colonnes)
+
+# === INITIALISATION PYGAME & FENETRE ADAPTATIVE ===
+pygame.init()
+info = pygame.display.Info()
+SCREEN_WIDTH = int(info.current_w * 0.8)
+SCREEN_HEIGHT = int(info.current_h * 0.8)
+
+# Calcul dynamique de la taille des tuiles et de l'inventaire
+TILE_SIZE = SCREEN_HEIGHT // ROWS
+WIDTH = TILE_SIZE * COLS
+INVENTORY_WIDTH = SCREEN_WIDTH - WIDTH
+SCREEN_HEIGHT = TILE_SIZE * ROWS  # s'assurer que la hauteur correspond à la grille
+
+# constantes couleurs
+WHITE = (255, 255, 255)
+GRAY = (200, 200, 200)
+RED = (255, 100, 100)
+BLACK = (0, 0, 0)
+
+PIECE_COLORS = {
+    "bleue": (100, 100, 255),
+    "verte": (100, 200, 100),
+    "violette": (180, 100, 180),
+    "orange": (255, 165, 0),
+    "rouge": (255, 100, 100),
+    "jaune": (255, 255, 100),
+}
+
+# Crée la fenêtre avec bordures (boutons fermer/min)
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+pygame.display.set_caption("Blue Prince - Interface")
+clock = pygame.time.Clock()
+font = pygame.font.SysFont(None, 24)
+
+# === CHARGEMENT DES IMAGES (optionnel) ===
+def charger_image(nom_fichier):
+    chemin = os.path.join("images", nom_fichier)
+    if os.path.exists(chemin):
+        try:
+            return pygame.image.load(chemin)
+        except Exception:
+            return None
+    return None
+
+images_pieces = {
+    "Vault": charger_image("vault.png"),
+    "Veranda": charger_image("veranda.png"),
+    "Bedroom": charger_image("bedroom.png"),
+    "Corridor": charger_image("corridor.png"),
+    "Chapel": charger_image("chapel.png"),
+    "Pantry": charger_image("pantry.png"),
+    "Entrance Hall": charger_image("entrance_hall.png"),
+}
+
+# === ETAT DU JEU ===
+player_pos = [ROWS - 1, COLS // 2]  # start : en bas & centré horizontalement
+grid = [[None for _ in range(COLS)] for _ in range(ROWS)]
+grid[player_pos[0]][player_pos[1]] = {"nom": "Entrance Hall", "couleur": "bleue"}
+
+inventory = {
+    "Pas": 70,
+    "Gemmes": 2,
+    "Clés": 0,
+    "Dés": 0,
+    "Pelle": False,
+    "Crochetage": False,
+    "Détecteur": False,
+    "Patte de lapin": False
+}
+
+# menu / sélection
+choix_en_cours = False
+index_selection = 0
+pieces_proposees = []
+
+# direction intentionnelle choisie par l'utilisateur (dy, dx)
+intended_dir = None  # None ou (dy, dx)
+
+# catalogue de pièces (source immuable)
+catalogue_pieces = [
+    {"nom": "Vault", "couleur": "bleue", "gemmes": 3, "rarete": 3},
+    {"nom": "Veranda", "couleur": "verte", "gemmes": 2, "rarete": 2},
+    {"nom": "Bedroom", "couleur": "violette", "gemmes": 1, "rarete": 1},
+    {"nom": "Corridor", "couleur": "orange", "gemmes": 0, "rarete": 0},
+    {"nom": "Chapel", "couleur": "rouge", "gemmes": 0, "rarete": 1},
+    {"nom": "Pantry", "couleur": "bleue", "gemmes": 0, "rarete": 0},
+]
+
+# === UTILITAIRES ===
+def tirer_pieces(catalogue, n=3):
+    """
+    Renvoie n copies de pièces choisies aléatoirement selon leur rareté.
+    On retourne des copies (copy.copy) pour ne pas muter le catalogue.
+    """
+    pieces_disponibles = []
+    for piece in catalogue:
+        poids = 1 / (3 ** piece["rarete"])
+        pieces_disponibles.append((piece, poids))
+
+    tirage = random.choices(
+        [p[0] for p in pieces_disponibles],
+        weights=[p[1] for p in pieces_disponibles],
+        k=n
+    )
+
+    # garantir au moins une pièce gratuite (gemmes == 0)
+    if not any(p["gemmes"] == 0 for p in tirage):
+        tirage[random.randint(0, n - 1)] = random.choice(
+            [p for p in catalogue if p["gemmes"] == 0]
+        )
+
+    return [copy.copy(p) for p in tirage]
+
+def in_bounds(row, col):
+    return 0 <= row < ROWS and 0 <= col < COLS
+
+# === DESSIN ===
+def draw_grid():
+    for row in range(ROWS):
+        for col in range(COLS):
+            x, y = col * TILE_SIZE, row * TILE_SIZE
+            rect = pygame.Rect(x, y, TILE_SIZE, TILE_SIZE)
+            pygame.draw.rect(screen, GRAY, rect, 1)
+
+            piece = grid[row][col]
+            if piece:
+                image = images_pieces.get(piece["nom"])
+                if image:
+                    image_scaled = pygame.transform.scale(image, (TILE_SIZE, TILE_SIZE))
+                    screen.blit(image_scaled, (x, y))
+                else:
+                    color = PIECE_COLORS.get(piece["couleur"], GRAY)
+                    pygame.draw.rect(screen, color, rect)
+                    text = font.render(piece["nom"], True, BLACK)
+                    screen.blit(text, (x + 5, y + 5))
+
+            if [row, col] == player_pos:
+                pygame.draw.rect(screen, RED, rect, 3)
+
+def draw_inventory(inv):
+    x = WIDTH + 20
+    y = 20
+    screen.fill(WHITE, pygame.Rect(WIDTH, 0, INVENTORY_WIDTH, SCREEN_HEIGHT))
+    screen.blit(font.render("Inventaire", True, BLACK), (x, y))
+    y += 30
+    for key, value in inv.items():
+        val = "✔️" if isinstance(value, bool) and value else value
+        text = font.render(f"{key}: {val}", True, BLACK)
+        screen.blit(text, (x, y))
+        y += 25
+
+def draw_selection_menu():
+    if not choix_en_cours:
+        return
+
+    # affiche la direction choisie en haut du menu
+    dir_text = {
+        (-1, 0): "Vers le HAUT",
+        (1, 0): "Vers le BAS",
+        (0, -1): "Vers la GAUCHE",
+        (0, 1): "Vers la DROITE"
+    }.get(intended_dir, "Direction")
+
+    x_base = WIDTH + 20
+    y_base = 120
+    screen.blit(font.render(f"Choix ({dir_text})", True, BLACK), (x_base, y_base - 30))
+
+    for i, piece in enumerate(pieces_proposees):
+        y = y_base + i * 110
+        rect = pygame.Rect(x_base, y, 260, 100)
+        pygame.draw.rect(screen, GRAY, rect)
+        pygame.draw.rect(screen, RED if i == index_selection else BLACK, rect, 3)
+
+        image = images_pieces.get(piece["nom"])
+        if image:
+            img_scaled = pygame.transform.scale(image, (80, 80))
+            screen.blit(img_scaled, (x_base + 10, y + 10))
+
+        nom = font.render(piece["nom"], True, BLACK)
+        gemmes = font.render(f"{piece['gemmes']} gemmes", True, BLACK)
+        rarete = font.render(f"Rareté: {piece['rarete']}", True, BLACK)
+
+        screen.blit(nom, (x_base + 100, y + 5))
+        screen.blit(gemmes, (x_base + 100, y + 3))
+        screen.blit(rarete, (x_base + 100, y + 55))
+
+# === LOGIQUE DE MOUVEMENT & PLACEMENT ===
+def attempt_open_choice(direction):
+    """Si la direction est valable (pas hors bord), ouvre le menu avec 3 pièces."""
+    global choix_en_cours, pieces_proposees, index_selection, intended_dir
+    dy, dx = direction
+    target_r = player_pos[0] + dy
+    target_c = player_pos[1] + dx
+    # check bordures : si hors-bords, ne pas ouvrir le menu
+    if not in_bounds(target_r, target_c):
+        # on peut + afficher message ou son
+        return False
+
+    pieces_proposees = tirer_pieces(catalogue_pieces, n=3)
+    index_selection = 0
+    choix_en_cours = True
+    intended_dir = direction
+    return True
+
+def place_selected_piece(idx):
+    """Place la pièce choisie dans la case target (si libre) et déplace le joueur dedans."""
+    global choix_en_cours, intended_dir
+    piece = copy.copy(pieces_proposees[idx])
+    dy, dx = intended_dir
+    target_r = player_pos[0] + dy
+    target_c = player_pos[1] + dx
+
+    placed = False
+    if in_bounds(target_r, target_c) and grid[target_r][target_c] is None:
+        grid[target_r][target_c] = piece
+        # déplacer le joueur dans la nouvelle case
+        player_pos[0], player_pos[1] = target_r, target_c
+    
+    else:
+        # si on ne peut pas placer devant (occupé ou hors-bords), on place sur la case actuelle
+        grid[player_pos[0]][player_pos[1]] = piece
+
+    choix_en_cours = False
+    intended_dir = None
+    return placed
+
+# === BOUCLE PRINCIPALE ===
+while True:
+    screen.fill(WHITE)
+    draw_grid()
+    draw_inventory(inventory)
+    draw_selection_menu()
+    pygame.display.flip()
+
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+
+        # gestion des touches
+        if event.type == pygame.KEYDOWN:
+            # si on est dans le menu de sélection, on utilise ←/→ pour changer et Enter pour valider
+            if choix_en_cours:
+                if event.key in (pygame.K_LEFT, pygame.K_q):
+                    index_selection = (index_selection - 1) % len(pieces_proposees)
+                elif event.key in (pygame.K_RIGHT, pygame.K_d):
+                    index_selection = (index_selection + 1) % len(pieces_proposees)
+                elif event.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
+                    place_selected_piece(index_selection)
+                elif event.key == pygame.K_ESCAPE:
+                    # annuler la sélection
+                    choix_en_cours = False
+                    intended_dir = None
+
+            else:
+                # Si on n'est pas dans le menu, appuyer sur une touche de direction OUVRE LE menu de choix
+                # on utilise z/s/q/d ET aussi les flèches haut/bas/gauche/droite
+                if event.key in (pygame.K_z, pygame.K_UP):
+                    attempt_open_choice((-1, 0))   # vers le haut
+                elif event.key in (pygame.K_s, pygame.K_DOWN):
+                    attempt_open_choice((1, 0))    # vers le bas
+                elif event.key in (pygame.K_q, pygame.K_LEFT):
+                    attempt_open_choice((0, -1))   # vers la gauche
+                elif event.key in (pygame.K_d, pygame.K_RIGHT):
+                    attempt_open_choice((0, 1))    # vers la droite
+
+    clock.tick(30)

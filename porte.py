@@ -1,4 +1,5 @@
-# Implémentation de la classe porte définissant la connexion entre deux salles du manoir. C'est le niveau de verrouillage d'une pièce (en fonction de la position d'apparition dans le Manoir)
+# Implémentation de la classe porte définissant la connexion entre deux salles du manoir.
+# C'est le niveau de verrouillage d'une pièce (en fonction de la position d'apparition dans le Manoir)
 
 class Porte:
 
@@ -17,14 +18,14 @@ class Porte:
         Détermination du niveau de verouillage aléatoirement:
         - niveau 0 : déverrouillées => 0 key
         - niveau 1 : simple tour => 1 key ou Lockpick Kit
-        - niveau 3 : double tour => 1 key
+        - niveau 2 : double tour => 1 key (Corrigé: niveau 3 -> niveau 2)
         """
-        # Rangée Entrance Hall toujours de niveau 0
-        if rangee_destination == 0:
+        # Rangée Entrance Hall (départ) toujours de niveau 0
+        if rangee_destination == 8:
             return 0
         
-        # Rangée Entrance Hall toujours de niveau 2
-        if rangee_destination == 8:
+        # Rangée Antechamber (arrivée) toujours de niveau 2
+        if rangee_destination == 0:
             return 2
 
         # Rangées intermédiaires => aléatoire
@@ -37,16 +38,16 @@ class Porte:
 
         """
 
-        if self.ouverte:
+        if self.est_ouverte:
             return True
         elif self.niveau_verrouillage == 0:
             return True 
         elif self.niveau_verrouillage == 1:
-            if joueur.inventaire.get_clés() >= 1 or joueur.inventaire.possede_kit_crochetage(): 
+            if joueur.inventaire.get_key() >= 1 or joueur.inventaire.possede_kit_crochetage(): 
                 return True
             return False
         elif self.niveau_verrouillage == 2:
-            if joueur.inventaire.get_clés() >= 1:
+            if joueur.inventaire.get_key() >= 1: 
                 return True
             return False
         
@@ -55,19 +56,22 @@ class Porte:
     def ouvrir(self, joueur) -> bool:
         """
         Ouverture de la porte et consommation des ressources du joueur.
-        * joueur: instance de la classe Joueur (cf fichier Joueur)
+        * joueur: instance de la classe Joueur 
 
         """
         if self.est_ouverte:
             return True
-        elif self.ouvrir(joueur):
+        elif self.ressource_ouvrir(joueur):
+            
             if self.niveau_verrouillage == 1:
                 if joueur.inventaire.possede_kit_crochetage():
                     pass 
                 else:
-                    joueur.inventaire.retirer_clé(1)
+                    joueur.inventaire.conso_cle(1)
+                    
             elif self.niveau_verrouillage == 2:
-                joueur.inventaire.retirer_clé(1) 
+                joueur.inventaire.conso_cle(1) 
+                
             self.est_ouverte = True
             return True
         
