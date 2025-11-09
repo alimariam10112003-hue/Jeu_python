@@ -210,7 +210,8 @@ def creer_salles_bleues():
             porte={"N": False, "S": True, "E": False, "O": False}, 
             objets_initiaux=["Wine bottles"], 
             effet="Le joueur peut consommer du vin. Chaque consommation côut 3 pas et donne 1 coin"),
-]
+    ]
+    return salles_bleues
 
 
 def creer_salles_verte():
@@ -270,6 +271,7 @@ def creer_salles_verte():
             porte={"N": True, "S": True, "E": False, "O": False}, 
             objets_initiaux=["Items random"], 
             effet="Augmente la probabilité de trouver des objets dans les pièces vertes suivante"),]  
+    return salles_verte 
 
 def creer_salles_viollette():
     salles_viollette = [
@@ -328,7 +330,8 @@ def creer_salles_viollette():
             porte={"N": False, "S": True, "E": False, "O": False}, 
             objets_initiaux=["Key ou Nourriture"], 
             effet="Gagne aléatoirement des pas"),]  
-    
+    return salles_viollette
+
 def creer_salles_orange():
     salles_orange = [
         Salle(
@@ -386,6 +389,7 @@ def creer_salles_orange():
             porte={"N": True, "S": True, "E": True, "O": True}, 
             objets_initiaux=[], 
             effet="Contient 7 portes toujours verouillées. Toutes les portes sont déverouillées si le Foyer est dans le Manoir"),]  
+    return salles_orange
 
 def creer_salles_jaune():
     salles_jaune = [
@@ -444,6 +448,7 @@ def creer_salles_jaune():
             porte={"N": False, "S": True, "E": False, "O": True}, 
             objets_initiaux=["Vente books"], 
             effet="Permet d'acquérir des livres"),]  
+    return salles_jaune
 
 def creer_salles_rouge():
     salles_rouge = [
@@ -502,3 +507,4 @@ def creer_salles_rouge():
             porte={"N": False, "S": True, "E": False, "O": True}, 
             objets_initiaux=["Vente books"], 
             effet="Augmente la probabilité de tirer d'autres salles rouge"),]  
+    return salles_rouge
