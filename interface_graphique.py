@@ -15,7 +15,7 @@ from catalogue_salle import (
 )
 
 # === CONFIGURATION DE BASE ===
-ROWS, COLS = 9, 5  # taille du manoir (lignes, colonnes)
+ROWS, COLS = 9, 5 # taille du manoir (lignes, colonnes)
 
 # === INITIALISATION PYGAME & FENETRE ADAPTATIVE ===
 pygame.init()
@@ -50,6 +50,7 @@ PIECE_COLORS = {
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Blue Prince - Interface")
 clock = pygame.time.Clock()
+font_path = os.path.join("fonts", "NotoColorEmoji.ttf")
 font = pygame.font.SysFont(None, 28)
 font_small = pygame.font.SysFont(None, 22)
 font_title = pygame.font.SysFont(None, 36)
@@ -59,7 +60,8 @@ def charger_image(nom_fichier):
     chemin = os.path.join("images", nom_fichier)
     if os.path.exists(chemin):
         try:
-            return pygame.image.load(chemin)
+            # Correction potentielle: Ajout de .convert_alpha() si les images ont de la transparence
+            return pygame.image.load(chemin).convert_alpha()
         except Exception:
             return None
     return None
@@ -73,15 +75,154 @@ images_pieces = {
     "Pantry": charger_image("pantry.png"),
     "Entrance Hall": charger_image("entrance_hall.png"),
 }
+# === CACHE D'IMAGES ===
+images_cache = {}
+
+# === UTILITAIRES DE SALLE (Déplacé pour résoudre la NameError) ===
+
+def charger_image_salle(salle):
+    """Charge l'image d'une salle (avec cache)"""
+    global images_cache
+    
+    if hasattr(salle, 'image_path'):
+        image_path = salle.image_path
+    else:
+        # Si c'est un dictionnaire
+        image_path = salle.get('image_path', f"img/{salle['nom'].lower().replace(' ', '_')}.png")
+    
+    if image_path in images_cache:
+        return images_cache[image_path]
+    
+    if os.path.exists(image_path):
+        try:
+            img = pygame.image.load(image_path).convert_alpha()
+            images_cache[image_path] = img
+            return img
+        except Exception:
+            return None
+    return None
+
+def salle_to_dict(salle):
+    """Convertit un objet Salle en dictionnaire pour la grille"""
+    if isinstance(salle, dict):
+        return salle
+    
+    # Correction: On s'assure que la clé 'image' est valorisée après que les images_cache sont définies
+    # Cependant, pour le moment on laisse la logique telle quelle, elle sera appelée par l'initialisation.
+    return {
+        "nom": salle.nom,
+        "couleur": salle.couleur,
+        "image_path": salle.image_path,
+        "cout_gem": salle.cout_gem,
+        "rarete": salle.rarete,
+        "porte": salle.porte,
+        "objets_initiaux": salle.objets_initiaux,
+        "effet": salle.effet,
+        "image": charger_image_salle(salle) # Utilisation de la fonction définie ci-dessus
+    }
+
+def get_rotation_angle_for_placement(target_r, target_c):
+    """
+    Détermine l'angle de rotation nécessaire pour orienter le mur (la face sans porte)
+    d'une pièce sur le bord du manoir.
+    """
+    if target_r == 0: # Rangée du haut (N) -> la pièce doit généralement faire face au SUD (porte N devient S)
+        return 180 
+    if target_r == ROWS - 1: # Rangée du bas (S) -> la pièce doit généralement faire face au NORD
+        return 0 # Pas de rotation nécessaire (ou 0 degrés)
+    if target_c == 0: # Colonne de gauche (O) -> la pièce doit généralement faire face à l'EST (porte O devient E)
+        return 90
+    if target_c == COLS - 1: # Colonne de droite (E) -> la pièce doit généralement faire face à l'OUEST (porte E devient O)
+        return 270
+    
+    return 0
+
+def rotate_piece(piece_dict, angle_deg):
+    """
+    Fait pivoter la logique de porte de la pièce et son image.
+    angle_deg doit être 90, 180, ou 270.
+    """
+    rotated_piece = piece_dict.copy()
+
+    # 1. Rotation de la Logique de Porte
+    portes_originales = piece_dict.get("porte", {})
+    portes_rotatives = {}
+    
+    rotation_map = {}
+    if angle_deg == 90:
+        rotation_map = {"N": "E", "E": "S", "S": "O", "O": "N"}
+    elif angle_deg == 180:
+        rotation_map = {"N": "S", "E": "O", "S": "N", "O": "E"}
+    elif angle_deg == 270:
+        rotation_map = {"N": "O", "O": "S", "S": "E", "E": "N"}
+    else:
+        return piece_dict 
+
+    for old_dir, new_dir in rotation_map.items():
+        portes_rotatives[new_dir] = portes_originales.get(old_dir, False)
+
+    rotated_piece["porte"] = portes_rotatives
+
+    # 2. Rotation de l'Image (si elle existe)
+    image_originale = piece_dict.get("image")
+    if image_originale:
+        rotated_piece["image"] = pygame.transform.rotate(image_originale, angle_deg)
+
+    return rotated_piece
+
+def tirer_pieces(catalogue, n=3):
+    """
+    Renvoie n copies de pièces choisies aléatoirement selon leur rareté (np.choice)
+    et garantit qu'au moins une pièce est gratuite (coût_gem = 0).
+    """
+    pieces_list = []
+    poids_list = []
+    pieces_gratuites = []
+
+    for piece in catalogue:
+        if hasattr(piece, 'rarete'):
+            rarete = piece.rarete
+            cout_gem = piece.cout_gem
+        else:
+            rarete = piece.get("rarete", 0)
+            cout_gem = piece.get("cout_gem", 0) 
+            
+        poids = 1.0 / (3 ** rarete)
+        
+        pieces_list.append(piece)
+        poids_list.append(poids)
+        
+        if cout_gem == 0:
+            pieces_gratuites.append(piece)
+
+    if not pieces_list:
+        return []
+
+    tirage = np.random.choice(
+        pieces_list,
+        size=n,
+        p=np.array(poids_list) / sum(poids_list),
+        replace=False if len(pieces_list) >= n and n>0 else True
+    ).tolist()
+
+    # --- Garantie de Pièce Gratuite ---
+    if pieces_gratuites and not any(p.cout_gem == 0 for p in tirage if hasattr(p, 'cout_gem')):
+        index_a_remplacer = random.randint(0, n - 1)
+        tirage[index_a_remplacer] = random.choice(pieces_gratuites)
+
+    return tirage
+
+def in_bounds(row, col):
+    return 0 <= row < ROWS and 0 <= col < COLS
+
 
 # === ETAT DU JEU ===
 player_pos = [ROWS - 1, COLS // 2]
 grid = [[None for _ in range(COLS)] for _ in range(ROWS)]
 
 # 1. Initialisation CORRECTE et UNIQUE de l'Entrance Hall
-# Cela utilise salle_to_dict, qui garantit la présence de l'attribut 'porte'
 salle_depart_obj = EntranceHall() 
-grid[player_pos[0]][player_pos[1]] = salle_to_dict(salle_depart_obj)
+grid[player_pos[0]][player_pos[1]] = salle_to_dict(salle_depart_obj) # <-- CORRECT
 
 # Créer le catalogue complet de pièces (Inchangé)
 catalogue_pieces = []
@@ -92,13 +233,7 @@ catalogue_pieces.extend(creer_salles_orange())
 catalogue_pieces.extend(creer_salles_jaune())
 catalogue_pieces.extend(creer_salles_rouge())
 
-# La pièce de départ doit être créée séparément si elle est spéciale
-# Sinon, on peut créer une Entrance Hall basique
-grid[player_pos[0]][player_pos[1]] = {
-    "nom": "Entrance Hall", 
-    "couleur": "bleue",
-    "image": charger_image("entrance_hall.png")
-}
+# 2. Suppression de la Ligne Erronée qui écrasait l'attribut 'porte' (Était ici)
 
 inventory = {
     "Pas": 96,
@@ -125,163 +260,10 @@ intended_dir = None
 # Dictionnaire pour stocker les images déjà chargées (pour éviter de recharger)
 images_cache = {}
 
-# === UTILITAIRES ===
-def charger_image_salle(salle):
-    """Charge l'image d'une salle (avec cache)"""
-    if hasattr(salle, 'image_path'):
-        image_path = salle.image_path
-    else:
-        # Si c'est un dictionnaire
-        image_path = salle.get('image_path', f"img/{salle['nom'].lower().replace(' ', '_')}.png")
-    
-    if image_path in images_cache:
-        return images_cache[image_path]
-    
-    if os.path.exists(image_path):
-        try:
-            img = pygame.image.load(image_path)
-            images_cache[image_path] = img
-            return img
-        except Exception:
-            return None
-    return None
-
-def salle_to_dict(salle):
-    """Convertit un objet Salle en dictionnaire pour la grille"""
-    if isinstance(salle, dict):
-        return salle
-    
-    return {
-        "nom": salle.nom,
-        "couleur": salle.couleur,
-        "image_path": salle.image_path,
-        "cout_gem": salle.cout_gem,
-        "rarete": salle.rarete,
-        "porte": salle.porte,
-        "objets_initiaux": salle.objets_initiaux,
-        "effet": salle.effet,
-        "image": charger_image_salle(salle)
-    }
-
-# === UTILITAIRES ===
-def rotate_piece(piece_dict, angle_deg):
-    """
-    Fait pivoter la logique de porte de la pièce et son image.
-    angle_deg doit être 90, 180, ou 270.
-    """
-    rotated_piece = piece_dict.copy()
-
-    # 1. Rotation de la Logique de Porte
-    portes_originales = piece_dict.get("porte", {})
-    portes_rotatives = {}
-    
-    # Définition des cycles de rotation
-    rotation_map = {}
-    if angle_deg == 90:
-        rotation_map = {"N": "E", "E": "S", "S": "O", "O": "N"}
-    elif angle_deg == 180:
-        rotation_map = {"N": "S", "E": "O", "S": "N", "O": "E"}
-    elif angle_deg == 270:
-        rotation_map = {"N": "O", "O": "S", "S": "E", "E": "N"}
-    else:
-        # Pas de rotation si l'angle n'est pas valide
-        return piece_dict 
-
-    for old_dir, new_dir in rotation_map.items():
-        # Transfère l'état de la porte (True/False) de l'ancienne direction à la nouvelle
-        portes_rotatives[new_dir] = portes_originales.get(old_dir, False)
-
-    rotated_piece["porte"] = portes_rotatives
-
-    # 2. Rotation de l'Image (si elle existe)
-    image_originale = piece_dict.get("image")
-    if image_originale:
-        # Utilise pygame.transform.rotate
-        rotated_piece["image"] = pygame.transform.rotate(image_originale, angle_deg)
-
-    return rotated_piece
-
-def get_rotation_angle_for_placement(target_r, target_c):
-    """
-    Détermine l'angle de rotation nécessaire pour orienter le mur (la face sans porte)
-    d'une pièce sur le bord du manoir.
-    """
-    if target_r == 0: # Rangée du haut (N) -> la pièce doit généralement faire face au SUD (porte N devient S)
-        return 180 
-    if target_r == ROWS - 1: # Rangée du bas (S) -> la pièce doit généralement faire face au NORD
-        return 0 # Pas de rotation nécessaire (ou 0 degrés)
-    if target_c == 0: # Colonne de gauche (O) -> la pièce doit généralement faire face à l'EST (porte O devient E)
-        return 90
-    if target_c == COLS - 1: # Colonne de droite (E) -> la pièce doit généralement faire face à l'OUEST (porte E devient O)
-        return 270
-    
-    # Pas de rotation pour les pièces centrales
-    return 0
-
-# ... (charger_image_salle, salle_to_dict inchangés) ...
-
-def tirer_pieces(catalogue, n=3):
-    """
-    Renvoie n copies de pièces choisies aléatoirement selon leur rareté (np.choice)
-    et garantit qu'au moins une pièce est gratuite (coût_gem = 0).
-    """
-    
-    # Prépare les listes des pièces et des poids
-    pieces_list = []
-    poids_list = []
-    
-    # Identifie les pièces gratuites
-    pieces_gratuites = []
-
-    for piece in catalogue:
-        # Assure la compatibilité avec les objets Salle et les dictionnaires
-        if hasattr(piece, 'rarete'):
-            rarete = piece.rarete
-            cout_gem = piece.cout_gem
-        else:
-            # Fallback pour les dictionnaires si nécessaire (assurez-vous que votre catalogue utilise des objets)
-            rarete = piece.get("rarete", 0)
-            cout_gem = piece.get("cout_gem", 0) 
-            
-        # Poids: Rareté N divise la probabilité par 3^N (selon l'énoncé)
-        poids = 1.0 / (3 ** rarete)
-        
-        pieces_list.append(piece)
-        poids_list.append(poids)
-        
-        if cout_gem == 0:
-            pieces_gratuites.append(piece)
-
-    if not pieces_list:
-        return [] # Pas de pièce disponible
-
-    # Tirage aléatoire pondéré en utilisant numpy.random.choice
-    # Le paramètre 'replace=False' n'est pas utilisé ici car les pièces peuvent être tirées plusieurs fois 
-    # (selon votre catalogue) et retirées plus tard de la pioche.
-    
-    # Utilisation de np.random.choice
-    tirage = np.random.choice(
-        pieces_list,
-        size=n,
-        p=np.array(poids_list) / sum(poids_list), # Normalise les poids pour obtenir des probabilités
-        replace=False if len(pieces_list) >= n and n>0 else True # Si on a assez de pièces, on ne remplace pas
-    ).tolist()
-
-    # --- Garantie de Pièce Gratuite ---
-    # Si aucune pièce du tirage n'est gratuite, on remplace l'une d'elles
-    if pieces_gratuites and not any(p.cout_gem == 0 for p in tirage if hasattr(p, 'cout_gem')):
-        # Remplacer une pièce aléatoire du tirage par une pièce gratuite aléatoire
-        index_a_remplacer = random.randint(0, n - 1)
-        tirage[index_a_remplacer] = random.choice(pieces_gratuites)
-
-    # Note: Nous devons retourner une liste d'objets, pas un array numpy, pour le reste de votre logique.
-    return tirage
-
-def in_bounds(row, col):
-    return 0 <= row < ROWS and 0 <= col < COLS
 
 # === DESSIN ===
 def draw_grid():
+    # ... (code inchangé) ...
     for row in range(ROWS):
         for col in range(COLS):
             x, y = col * TILE_SIZE, row * TILE_SIZE
@@ -290,7 +272,7 @@ def draw_grid():
             piece = grid[row][col]
             if piece:
                 # Case découverte avec image ou couleur
-                image = piece.get("image") or charger_image_salle(piece)
+                image = piece.get("image")
                 if image:
                     image_scaled = pygame.transform.scale(image, (TILE_SIZE, TILE_SIZE))
                     screen.blit(image_scaled, (x, y))
@@ -312,7 +294,7 @@ def draw_grid():
                 pygame.draw.rect(screen, RED, rect, 4)
 
 def draw_inventory(inv):
-    """Affiche l'inventaire avec mise en page améliorée comme dans l'image 2"""
+    # ... (code inchangé) ...
     x_start = WIDTH + 20
     y = 20
     
@@ -382,7 +364,7 @@ def draw_inventory(inv):
             y += 25
 
 def draw_selection_menu():
-    """Menu de sélection des pièces centré verticalement"""
+    # ... (code inchangé) ...
     if not choix_en_cours:
         return
 
@@ -441,23 +423,6 @@ def draw_selection_menu():
         rarete_text = font_small.render(f"Rareté: {rarete}", True, BLACK)
         screen.blit(rarete_text, (text_x, y + 75))
 
-# === LOGIQUE ===
-def attempt_open_choice(direction):
-    global choix_en_cours, pieces_proposees, index_selection, intended_dir, message_action
-    dy, dx = direction
-    target_r = player_pos[0] + dy
-    target_c = player_pos[1] + dx
-    
-    if not in_bounds(target_r, target_c):
-        message_action = "Impossible d'aller dans cette direction!"
-        return False
-
-    pieces_proposees = tirer_pieces(catalogue_pieces, n=3)
-    index_selection = 0
-    choix_en_cours = True
-    intended_dir = direction
-    message_action = ""
-    return True
 
 # === LOGIQUE ===
 def handle_move(direction):
@@ -483,12 +448,8 @@ def handle_move(direction):
     
     # 3. Vérification de la Porte dans la Salle Actuelle (Mur intérieur)
     
-    # Le dictionnaire 'porte' est un attribut de votre objet Salle (ou de son dict dans la grille)
-    # Ex: {"N": True, "S": False, "E": True, "O": True}
-    
-    # Si la pièce n'a pas l'attribut 'porte', on suppose un mur pour la sécurité
+    # Si la pièce n'a pas l'attribut 'porte' ou si la porte n'est pas True
     if current_room and current_room.get("porte", {}).get(dir_key) is not True:
-        # Si la valeur associée à la direction est False (pas de porte) ou non présente
         message_action = f"Mur interne : La salle '{current_room['nom']}' n'a pas de porte vers {dir_key}."
         return False
     
@@ -522,8 +483,15 @@ def handle_move(direction):
         return True
 
 def place_selected_piece(idx):
-    global choix_en_cours, intended_dir, message_action, inventory
+    global choix_en_cours, intended_dir, message_action, inventory, catalogue_pieces
     piece = pieces_proposees[idx]
+    
+    # --- MODIFICATION: Retirer la pièce du catalogue (Pioche) doit être fait ici ---
+    # Nous devons retirer l'OBJET Salle de la liste catalogue_pieces, pas le dict.
+    if piece in catalogue_pieces:
+        catalogue_pieces.remove(piece)
+    # -----------------------------------------------------------------------------
+
     dy, dx = intended_dir
     target_r = player_pos[0] + dy
     target_c = player_pos[1] + dx
@@ -549,15 +517,16 @@ def place_selected_piece(idx):
         grid[target_r][target_c] = piece_dict
         player_pos[0], player_pos[1] = target_r, target_c
         inventory["Gemmes"] -= cout_gem
-        inventory["Pas"] -= 1
+        # Les Pas ont déjà été consommés dans handle_move pour ouvrir la porte
         message_action = f"Vous entrez dans {nom}."
     else:
-        grid[player_pos[0]][player_pos[1]] = piece_dict
-        message_action = "Pièce placée sur votre position."
+        # Cette partie est incorrecte car la pièce n'est jamais placée sur la position du joueur
+        message_action = "Erreur logique: La pièce n'a pas été placée."
 
     choix_en_cours = False
     intended_dir = None
     return True
+
 
 # === BOUCLE PRINCIPALE ===
 while True:
