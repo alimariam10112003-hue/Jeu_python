@@ -1,6 +1,5 @@
 import random
 
-
 # Dictionnaire de la nourriture
 NOURRITURE_VALEURS = {
     "Pomme": 2,
@@ -53,26 +52,48 @@ class Objet:
             joueur.inventaire.gem = 2
             print("Effet: Votre compte de Gemmes est réinitialisé à 2.")
 
+        # Réintégration de la logique de ramassage avec la liste objets_a_retirer
+        # NOTE: Cette boucle s'exécutera uniquement si l'objet 'self' a un attribut 'objets'.
+        
+        # Initialisation de la liste des objets à retirer de la salle
         objets_a_retirer = []
-        for objet in self.objets:
-            if isinstance(objet, Cle):
-                joueur.inventaire.gagner_clé(1)
-                objets_a_retirer.append(objet)
-                print(f"Objet ramassé: {objet.nom}")
-                
-            elif isinstance(objet, Nourriture):
-                objet.utiliser(joueur)
-                objets_a_retirer.append(objet)
-                print(f"Nourriture utilisée: {objet.nom}")
+        
+        # Vérification si l'attribut self.objets existe (i.e., si self est un objet Salle)
+        if hasattr(self, 'objets'):
+            for objet in self.objets:
+                # 1. Gestion des consommables (Clé, Gemme, Coin, Nourriture)
+                if isinstance(objet, Cle):
+                    joueur.inventaire.gagner_cle(1)
+                    objets_a_retirer.append(objet)
+                    print(f"Objet ramassé: {objet.nom}")
+                    
+                elif isinstance(objet, Nourriture):
+                    objet.utiliser(joueur)
+                    objets_a_retirer.append(objet)
+                    print(f"Nourriture utilisée: {objet.nom}")
+                    
+                elif isinstance(objet, Gem):
+                    joueur.inventaire.gagner_gemme(1)
+                    objets_a_retirer.append(objet)
+                    print(f"Objet ramassé: {objet.nom}")
+
+                elif isinstance(objet, Coin):
+                    joueur.inventaire.gagner_coin(1)
+                    objets_a_retirer.append(objet)
+                    print(f"Objet ramassé: {objet.nom}")
+                    
+                # 2. Objets Permanents
+                elif isinstance(objet, Permanent):
+                    objet.ramasser(joueur)
+                    objets_a_retirer.append(objet) 
+                    
+                # 3. Éléments Interactifs (simplement notés)
+                elif isinstance(objet, Interactif):
+                    print(f"Élément interactif trouvé: {objet.nom}.")
             
-            elif isinstance(objet, Permanent):
-                objet.ramasser(joueur)
-                objets_a_retirer.append(objet) 
-                
-            elif isinstance(objet, Interactif):
-                print(f"Élément interactif trouvé: {objet.nom}.")
-                
-        self.objets = [i for i in self.objets if i not in objets_a_retirer]
+            # Application du retrait des objets de la salle (self)
+            self.objets = [i for i in self.objets if i not in objets_a_retirer]
+
 
 class Consommable(Objet):
     """Objet rétiré de l'inventaire après son utilisation/consommation"""
