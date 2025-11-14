@@ -76,7 +76,7 @@ def creer_salles_bleues():
         Salle(
             nom="Rumpus Room",
             couleur="bleue",
-            image_path="img/rumpus_room.png", 
+            image_path="img/rumpus.png", 
             cout_gem=1,
             rarete=1, 
             condition_placement="Aucune",
