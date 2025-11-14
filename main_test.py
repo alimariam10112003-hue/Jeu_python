@@ -1,12 +1,9 @@
-# main_fixed.py
 import pygame
 import numpy as np
 import sys
 import random
 import os
 import copy
-
-# --- Importations des classes métier (doivent exister dans le même dossier/projet) ---
 from joueur import Inventaire, Joueur
 from aleatoire import GenerateurAlea
 from porte import Porte
