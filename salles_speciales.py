@@ -17,7 +17,8 @@ class EntranceHall(Salle):
             condition_placement="Premiere_Piece", 
             porte={"N": True, "S": True, "E": True, "O": True},
             objets_initiaux=[],
-            effet=None
+            effet=None,
+            default_entry_direction="S" 
         )
 
 # Définition de la salle d'arrivée => effet de victoire 
@@ -35,6 +36,6 @@ class Antechamber(Salle):
             condition_placement="Derniere_Piece", 
             porte={"N": False, "S": True, "E": False, "O": False},
             objets_initiaux=[],
-            effet="Victoire"
+            effet="Victoire",
+            default_entry_direction="S"
         )
-    
