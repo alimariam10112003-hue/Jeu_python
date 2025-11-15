@@ -4,6 +4,7 @@ import sys
 import random
 import os
 import copy
+
 from joueur import Inventaire, Joueur
 from aleatoire import GenerateurAlea
 from porte import Porte
