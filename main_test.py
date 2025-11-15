@@ -24,13 +24,16 @@ ROWS, COLS = 9, 5
 
 pygame.init()
 info = pygame.display.Info()
-SCREEN_WIDTH = int(info.current_w * 0.8)
-SCREEN_HEIGHT = int(info.current_h * 0.8)
+# --- MODIFICATION PLEIN ÉCRAN ---
+# On utilise la largeur et hauteur complètes de l'écran
+SCREEN_WIDTH = info.current_w
+SCREEN_HEIGHT = info.current_h
+# --- FIN MODIFICATION ---
 
 TILE_SIZE = SCREEN_HEIGHT // ROWS
 WIDTH = TILE_SIZE * COLS
 INVENTORY_WIDTH = SCREEN_WIDTH - WIDTH
-SCREEN_HEIGHT = TILE_SIZE * ROWS
+SCREEN_HEIGHT = TILE_SIZE * ROWS # Recalcule la hauteur pour s'adapter parfaitement aux tuiles
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -50,7 +53,11 @@ PIECE_COLORS = {
 }
 
 # fenêtre
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+# --- MODIFICATION PLEIN ÉCRAN ---
+# Ajout du drapeau pygame.FULLSCREEN
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.FULLSCREEN)
+# --- FIN MODIFICATION ---
+
 pygame.display.set_caption("Blue Prince - Interface Fusionnée")
 clock = pygame.time.Clock()
 
@@ -211,7 +218,7 @@ def rotate_piece(piece_dict, angle_deg):
     portes_rotatives = {}
     rotation_map = {}
     
-    # CORRECTION : Utilisation de la rotation ANTI-HORAIRE (CCW) pour correspondre à Pygame
+    # Rotation ANTI-HORAIRE (CCW) pour correspondre à Pygame
     if angle_deg == 90: 
         # 90 deg CCW: N -> O, O -> S, S -> E, E -> N
         rotation_map = {"N": "O", "O": "S", "S": "E", "E": "N"}
@@ -263,7 +270,7 @@ def tirer_pieces(catalogue, n=3):
     try:
         poids_total = sum(poids_list)
         if poids_total == 0:
-             poids_norm = None # Tirage uniforme si tous les poids sont nuls
+             poids_norm = None 
         else:
              poids_norm = np.array(poids_list) / poids_total
              
