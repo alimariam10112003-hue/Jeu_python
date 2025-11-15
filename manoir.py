@@ -10,11 +10,10 @@ from catalogue_salle import (
 )
 
 class Manoir:
-    # Constantes
     LIGNES = 9
     COLONNES = 5
-    POS_DEPART = (LIGNES - 1, COLONNES // 2)  # (8, 2)
-    POS_ARRIVEE = (0, COLONNES // 2)          # (0, 2)
+    POS_DEPART = (LIGNES - 1, COLONNES // 2) 
+    POS_ARRIVEE = (0, COLONNES // 2)         
 
     def __init__(self, joueur: Joueur, generateur_alea: GenerateurAlea):
         """
@@ -24,13 +23,8 @@ class Manoir:
         self.generateur = generateur_alea 
         self.catalogue_pioche = self._assembler_catalogue()
         
-        # Grille de jeu: une liste de listes stockant des objets Salle (ou None)
         self.grille = [[None for _ in range(self.COLONNES)] for _ in range(self.LIGNES)]
-        
-        # Dictionnaire pour stocker les objets Porte (liaison spatiale)
         self.portes = {} 
-
-        # Initialisation du jeu
         self._initialiser_pieces_fixes()
 
     def _assembler_catalogue(self):

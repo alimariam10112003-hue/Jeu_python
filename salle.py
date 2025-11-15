@@ -4,12 +4,14 @@
 import random 
 
 class Salle:
+
     """
     Initialisation de la classe "Salle" permettant de définir les propriétes communes des salles.
     Utilité: regrouper les variables pour décrire une pièce et le traitement associé aux pièces.
     """
-    
-    def __init__(self, nom: str, couleur: str,image_path: str, cout_gem: int, rarete: int, condition_placement: str, porte: dict, objets_initiaux: list = None, effet: str = None):
+
+    def __init__(self, nom: str, couleur: str,image_path: str, cout_gem: int, rarete: int, condition_placement: str, porte: dict, objets_initiaux: list = None, effet: str = None, default_entry_direction: str = "S"):
+        
         """
         Initialisation d'une salle
         
@@ -23,7 +25,7 @@ class Salle:
         * objets initiaux: objets contenu dans la pièce
         * effet: effet spécial de la pièce
         """
-        
+
         self.nom = nom
         self.couleur = couleur
         self.image_path = image_path
@@ -33,5 +35,6 @@ class Salle:
         self.porte = porte
         self.objets_initiaux = objets_initiaux if objets_initiaux is not None else []
         self.effet = effet
+        self.default_entry_direction = default_entry_direction
 
         self.position = None

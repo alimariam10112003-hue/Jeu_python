@@ -20,7 +20,6 @@ from catalogue_salle import (
     creer_salles_rouge
 )
 
-# === CONFIGURATION DE BASE ===
 ROWS, COLS = 9, 5
 
 pygame.init()
@@ -33,7 +32,6 @@ WIDTH = TILE_SIZE * COLS
 INVENTORY_WIDTH = SCREEN_WIDTH - WIDTH
 SCREEN_HEIGHT = TILE_SIZE * ROWS
 
-# --- COULEURS (Blueprint style) ---
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 RED = (255, 100, 100)
@@ -150,44 +148,105 @@ def charger_image_salle(salle):
     return None
 
 def salle_to_dict(salle):
-    if isinstance(salle, dict):
-        d = salle.copy()
-        d["image"] = charger_image_salle(salle)
-        return d
-    return {
-        "nom": salle.nom,
-        "couleur": salle.couleur,
-        "image_path": getattr(salle, "image_path", None),
-        "image": charger_image_salle(salle),
-        "cout_gem": getattr(salle, "cout_gem", 0),
-        "rarete": getattr(salle, "rarete", 0),
-        "porte": getattr(salle, "porte", {}),
-        "objets_initiaux": getattr(salle, "objets_initiaux", []),
-        "effet": getattr(salle, "effet", None),
-    }
+    # Charge l'image.
+    img_chargee = charger_image_salle(salle)
 
-def get_rotation_angle_for_placement(target_r, target_c):
-    if target_r == 0: return 180
-    if target_r == ROWS - 1: return 0
-    if target_c == 0: return 90
-    if target_c == COLS - 1: return 270
-    return 0
+    # Vérifie si 'salle' est un objet (comme EntranceHall) ou un dict
+    if isinstance(salle, dict):
+        # C'est un dictionnaire
+        default_entry = salle.get("default_entry_direction", "S")
+        nom = salle.get('nom', '???')
+        couleur = salle.get('couleur', 'bleue')
+        image_path = salle.get('image_path', None)
+        cout_gem = salle.get('cout_gem', 0)
+        rarete = salle.get('rarete', 0)
+        porte = salle.get('porte', {})
+        objets_initiaux = salle.get('objets_initiaux', [])
+        effet = salle.get('effet', None)
+        
+    else:
+        # C'est un objet (classe Salle ou EntranceHall)
+        default_entry = getattr(salle, "default_entry_direction", "S")
+        nom = getattr(salle, 'nom', '???')
+        couleur = getattr(salle, 'couleur', 'bleue')
+        image_path = getattr(salle, 'image_path', None)
+        cout_gem = getattr(salle, 'cout_gem', 0)
+        rarete = getattr(salle, 'rarete', 0)
+        porte = getattr(salle, 'porte', {})
+        objets_initiaux = getattr(salle, 'objets_initiaux', [])
+        effet = getattr(salle, 'effet', None)
+
+    piece_dict = {
+        "nom": nom,
+        "couleur": couleur,
+        "image_path": image_path,
+        "image": img_chargee,
+        "cout_gem": cout_gem,
+        "rarete": rarete,
+        "porte": porte,
+        "objets_initiaux": objets_initiaux,
+        "effet": effet,
+        "rotation_angle": 0,
+        "default_entry_direction": default_entry
+    }
+    
+    # Redimensionne l'image originale UNE SEULE FOIS à TILE_SIZE et la stocke
+    if piece_dict.get("image"):
+        try:
+            # On utilise smoothscale pour une meilleure qualité
+            piece_dict["image_original"] = pygame.transform.smoothscale(piece_dict["image"], (TILE_SIZE, TILE_SIZE))
+            piece_dict["image"] = piece_dict["image_original"] # L'image actuelle est l'image de base
+        except Exception as e:
+            print(f"Erreur de scaling image pour {piece_dict['nom']}: {e}")
+            piece_dict["image"] = None
+            piece_dict["image_original"] = None
+        
+    return piece_dict
 
 def rotate_piece(piece_dict, angle_deg):
     rotated_piece = piece_dict.copy()
+    
+    # 1. Rotation de la logique (le dictionnaire 'porte')
     portes_originales = piece_dict.get("porte", {})
     portes_rotatives = {}
     rotation_map = {}
-    if angle_deg == 90: rotation_map = {"N": "E", "E": "S", "S": "O", "O": "N"}
-    elif angle_deg == 180: rotation_map = {"N": "S", "E": "O", "S": "N", "O": "E"}
-    elif angle_deg == 270: rotation_map = {"N": "O", "O": "S", "S": "E", "E": "N"}
-    else: return piece_dict
+    
+    # CORRECTION : Utilisation de la rotation ANTI-HORAIRE (CCW) pour correspondre à Pygame
+    if angle_deg == 90: 
+        # 90 deg CCW: N -> O, O -> S, S -> E, E -> N
+        rotation_map = {"N": "O", "O": "S", "S": "E", "E": "N"}
+    elif angle_deg == 180: 
+        # 180 deg CCW: N -> S, S -> N, E -> O, O -> E
+        rotation_map = {"N": "S", "S": "N", "E": "O", "O": "E"}
+    elif angle_deg == 270: 
+        # 270 deg CCW: N -> E, E -> S, S -> O, O -> N
+        rotation_map = {"N": "E", "E": "S", "S": "O", "O": "N"}
+    else: 
+        rotated_piece["rotation_angle"] = 0
+        return rotated_piece # Pas de rotation
+    
     for old_dir, new_dir in rotation_map.items():
         portes_rotatives[new_dir] = portes_originales.get(old_dir, False)
+        
     rotated_piece["porte"] = portes_rotatives
-    img = piece_dict.get("image")
-    if img:
-        rotated_piece["image"] = pygame.transform.rotate(img, angle_deg)
+    rotated_piece["rotation_angle"] = angle_deg
+
+    # 2. Rotation de l'image (la partie visuelle)
+    img_original_scaled = rotated_piece.get("image_original")
+    
+    if img_original_scaled:
+        rotated_img = pygame.transform.rotate(img_original_scaled, angle_deg)
+        
+        final_surface = pygame.Surface((TILE_SIZE, TILE_SIZE), pygame.SRCALPHA)
+        
+        dest_center = (TILE_SIZE // 2, TILE_SIZE // 2)
+        
+        rotated_rect = rotated_img.get_rect(center = dest_center)
+        
+        final_surface.blit(rotated_img, rotated_rect)
+        
+        rotated_piece["image"] = final_surface
+    
     return rotated_piece
 
 def tirer_pieces(catalogue, n=3):
@@ -201,8 +260,19 @@ def tirer_pieces(catalogue, n=3):
         pieces_list.append(piece); poids_list.append(poids)
         if cout_gem == 0: pieces_gratuites.append(piece)
     if not pieces_list: return []
-    tirage = np.random.choice(pieces_list, size=n, p=np.array(poids_list)/sum(poids_list),
-                              replace=False if len(pieces_list) >= n and n > 0 else True).tolist()
+    try:
+        poids_total = sum(poids_list)
+        if poids_total == 0:
+             poids_norm = None # Tirage uniforme si tous les poids sont nuls
+        else:
+             poids_norm = np.array(poids_list) / poids_total
+             
+        tirage = np.random.choice(pieces_list, size=n, p=poids_norm,
+                                replace=False if len(pieces_list) >= n and n > 0 else True).tolist()
+    except Exception as e:
+        print(f"Erreur de tirage, pioche vide ? {e}")
+        return []
+        
     if pieces_gratuites and not any((hasattr(p, 'cout_gem') and p.cout_gem == 0) or (isinstance(p, dict) and p.get("cout_gem", 0) == 0) for p in tirage):
         tirage[random.randint(0, n-1)] = random.choice(pieces_gratuites)
     return tirage
@@ -237,12 +307,9 @@ intended_dir = None
 
 # === DESSIN ===
 def draw_start_screen():
-    """Affiche le menu; si menu_background existe on l'affiche, sinon fallback blueprint."""
     global play_button_rect, menu_background
 
-    # draw background image if present, else blueprint pattern
     if menu_background:
-        # blit l'image entière (déjà scalée au chargement)
         screen.blit(menu_background, (0, 0))
     else:
         screen.fill(BLUEPRINT_BG)
@@ -252,17 +319,14 @@ def draw_start_screen():
         for y in range(0, SCREEN_HEIGHT, step):
             pygame.draw.line(screen, BLUEPRINT_GRID_COLOR, (0, y), (SCREEN_WIDTH, y), 1)
 
-    # titre
     title_surf = font_title.render("BLUE PRINCE", True, BLUEPRINT_TEXT_COLOR)
     screen.blit(title_surf, ((SCREEN_WIDTH - title_surf.get_width()) // 2, SCREEN_HEIGHT // 4))
 
-    # bouton JOUER (retourné pour debug/usage)
     button_w, button_h = 360, 100
     bx = (SCREEN_WIDTH - button_w) // 2
     by = SCREEN_HEIGHT // 2
     play_button_rect = pygame.Rect(bx, by, button_w, button_h)
 
-    # hover effect
     mx, my = pygame.mouse.get_pos()
     if bx <= mx <= bx + button_w and by <= my <= by + button_h:
         color = BLUEPRINT_GRID_COLOR
@@ -290,8 +354,7 @@ def draw_grid():
             if piece:
                 image = piece.get("image")
                 if image:
-                    image_scaled = pygame.transform.scale(image, (TILE_SIZE, TILE_SIZE))
-                    screen.blit(image_scaled, (x, y))
+                    screen.blit(image, (x, y)) 
                 else:
                     couleur = piece.get("couleur", "bleue")
                     color = PIECE_COLORS.get(couleur, GRAY)
@@ -305,7 +368,7 @@ def draw_grid():
     pygame.draw.rect(screen, BLUEPRINT_GRID_COLOR, grid_rect_full, 4)
     global_rect = pygame.Rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT)
     pygame.draw.rect(screen, WHITE, global_rect, 5)
-    # curseur joueur
+    
     r, c = player_pos
     pygame.draw.rect(screen, RED, pygame.Rect(c * TILE_SIZE, r * TILE_SIZE, TILE_SIZE, TILE_SIZE), 4)
 
@@ -379,24 +442,33 @@ def draw_selection_menu():
     x_base = WIDTH + 20; y_start = 150
     title = font.render(f"Choix ({dir_text})", True, BLUEPRINT_TEXT_COLOR)
     screen.blit(title, (x_base, y_start - 40))
+    
+    if not pieces_proposees:
+        return 
+
     for i, piece in enumerate(pieces_proposees):
         y = y_start + i * 130
-        nom = piece.nom if hasattr(piece, 'nom') else piece.get("nom", "???")
-        cout_gem = piece.cout_gem if hasattr(piece, 'cout_gem') else piece.get("cout_gem", piece.get("gemmes", 0))
-        rarete = piece.rarete if hasattr(piece, 'rarete') else piece.get("rarete", 0)
-        couleur = piece.couleur if hasattr(piece, 'couleur') else piece.get("couleur", "bleue")
+        
+        piece_dict = salle_to_dict(piece)
+        nom = piece_dict.get("nom", "???")
+        cout_gem = piece_dict.get("cout_gem", 0)
+        rarete = piece_dict.get("rarete", 0)
+        couleur = piece_dict.get("couleur", "bleue")
+        
         rect = pygame.Rect(x_base, y, INVENTORY_WIDTH - 40, 120)
         bg_color = (255, 200, 200) if i == index_selection else (40, 40, 70)
         pygame.draw.rect(screen, bg_color, rect)
         pygame.draw.rect(screen, RED if i == index_selection else BLUEPRINT_GRID_COLOR, rect, 3)
-        image = charger_image_salle(piece)
+        
+        image = piece_dict.get("image_original") 
         if image:
-            img_scaled = pygame.transform.scale(image, (100, 100))
+            img_scaled = pygame.transform.scale(image, (100, 100)) 
             screen.blit(img_scaled, (x_base + 10, y + 10))
         else:
             color_rect = pygame.Rect(x_base + 10, y + 10, 100, 100)
             color = PIECE_COLORS.get(couleur, GRAY)
             pygame.draw.rect(screen, color, color_rect)
+            
         text_x = x_base + 120
         screen.blit(font.render(nom, True, BLUEPRINT_TEXT_COLOR), (text_x, y + 15))
         gemmes_text = f"💎 {cout_gem} gemmes" if cout_gem > 0 else "Gratuit"
@@ -404,7 +476,6 @@ def draw_selection_menu():
         rarete_text = font_small.render(f"Rareté: {rarete}", True, BLUEPRINT_TEXT_COLOR)
         screen.blit(rarete_text, (text_x, y + 75))
 
-# === LOGIQUE ===
 def handle_move(direction):
     global choix_en_cours, pieces_proposees, index_selection, intended_dir, message_action, inventory, player_pos
     dy, dx = direction
@@ -440,31 +511,80 @@ def handle_move(direction):
 
 def place_selected_piece(idx):
     global choix_en_cours, intended_dir, message_action, inventory, catalogue_pieces, player_pos
+    
+    if not pieces_proposees or idx >= len(pieces_proposees):
+        message_action = "Erreur: Sélection invalide."
+        choix_en_cours = False
+        return False
+        
     piece = pieces_proposees[idx]
+    
     if piece in catalogue_pieces:
-        catalogue_pieces.remove(piece)
+        try:
+            catalogue_pieces.remove(piece)
+        except ValueError:
+            pass 
+        
     dy, dx = intended_dir
     target_r = player_pos[0] + dy
     target_c = player_pos[1] + dx
-    cout_gem = piece.cout_gem if hasattr(piece, 'cout_gem') else piece.get("cout_gem", piece.get("gemmes", 0))
-    nom = piece.nom if hasattr(piece, 'nom') else piece.get("nom", "???")
+    
+    piece_info = salle_to_dict(piece)
+    cout_gem = piece_info.get("cout_gem", 0)
+    nom = piece_info.get("nom", "???")
+    
     if cout_gem > inventory["Gemmes"]:
         message_action = "Pas assez de gemmes! (Pas remboursé)"
         inventory["Pas"] += 1
         choix_en_cours = False
         intended_dir = None
         return False
+    
     piece_dict = salle_to_dict(piece)
-    angle = get_rotation_angle_for_placement(target_r, target_c)
-    if angle != 0:
-        piece_dict = rotate_piece(piece_dict, angle)
+
+    direction_map = {(-1, 0): "N", (1, 0): "S", (0, -1): "O", (0, 1): "E"}
+    opposite_map = {"N": "S", "S": "N", "E": "O", "O": "E"}
+    
+    dir_actuelle = direction_map.get(intended_dir) 
+    target_connection = opposite_map.get(dir_actuelle)
+    
+    default_entry = piece_dict.get("default_entry_direction", "S") 
+
+    angle = 0
+    
+    # Rotation CCW (sens anti-horaire) pour aligner default_entry avec target_connection
+    rotation_from_N = {"N": 0, "S": 180, "E": 270, "O": 90}
+    rotation_from_S = {"N": 180, "S": 0, "E": 90, "O": 270}
+    rotation_from_E = {"N": 90, "S": 270, "E": 0, "O": 180}
+    rotation_from_O = {"N": 270, "S": 90, "E": 180, "O": 0}
+    
+    if default_entry == "N":
+        angle = rotation_from_N.get(target_connection, 0)
+    elif default_entry == "S":
+        angle = rotation_from_S.get(target_connection, 0)
+    elif default_entry == "E":
+        angle = rotation_from_E.get(target_connection, 0)
+    elif default_entry == "O":
+        angle = rotation_from_O.get(target_connection, 0)
+
+    piece_dict = rotate_piece(piece_dict, angle)
+    
+    if piece_dict.get("porte", {}).get(target_connection) is not True:
+        message_action = f"Erreur de connexion : La pièce '{nom}' n'a pas de porte pour cette entrée."
+        inventory["Pas"] += 1 
+        choix_en_cours = False
+        intended_dir = None
+        return False
+    
     if in_bounds(target_r, target_c) and grid[target_r][target_c] is None:
         grid[target_r][target_c] = piece_dict
         player_pos[0], player_pos[1] = target_r, target_c
         inventory["Gemmes"] -= cout_gem
-        message_action = f"Vous entrez dans {nom}."
+        message_action = f"Vous entrez dans {nom}. ({cout_gem} gemmes dépensées)."
     else:
-        message_action = "Erreur logique: La pièce n'a pas été placée."
+        message_action = "Erreur logique: La pièce n'a pas pu être placée à cet endroit."
+        inventory["Pas"] += 1 
+    
     choix_en_cours = False
     intended_dir = None
     return True
@@ -475,10 +595,8 @@ while True:
         if event.type == pygame.QUIT:
             pygame.quit(); sys.exit()
 
-        # menu actif : on gère uniquement les événements du menu
         if menu_active:
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                # calculer rect du bouton JOUER (même position que dans draw_start_screen)
                 button_w, button_h = 360, 100
                 bx = (SCREEN_WIDTH - button_w) // 2; by = SCREEN_HEIGHT // 2
                 rect_now = pygame.Rect(bx, by, button_w, button_h)
@@ -489,10 +607,8 @@ while True:
                     menu_active = False
                 elif event.key == pygame.K_ESCAPE:
                     pygame.quit(); sys.exit()
-            # ignorer le reste tant que menu actif
             continue
 
-        # clics en jeu (aide, quitter)
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             mouse_pos = event.pos
             if exit_button_rect.collidepoint(mouse_pos):
@@ -501,7 +617,6 @@ while True:
                 choix_en_cours = False
                 message_action = "AIDE: Déplacez-vous avec ZQSD ou les flèches.\nTrouvez l'Antichambre pour gagner."
 
-        # gestion clavier en jeu
         if event.type == pygame.KEYDOWN:
             if choix_en_cours:
                 if event.key in (pygame.K_UP, pygame.K_z):
@@ -523,7 +638,6 @@ while True:
                 elif event.key in (pygame.K_d, pygame.K_RIGHT):
                     handle_move((0, 1))
 
-    # DESSIN
     if menu_active:
         play_button_rect = draw_start_screen()
     else:
