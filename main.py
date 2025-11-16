@@ -65,11 +65,19 @@ font_button = pygame.font.SysFont(None, 60, bold=True)
 font_game_over = pygame.font.SysFont(None, 100, bold=True) 
 
 
-# === GESTIONNAIRES D'IMAGES ===
+# Gestionnaire d'images
 menu_background = None
 images_cache = {}
 
 def load_all_assets():
+    """
+    Charge l'image de fond du menu et gère le cache global d'images.
+
+    Cette fonction tente de charger l'image 'jeu.jpg' depuis le dossier 'img/', 
+    la met à l'échelle pour correspondre aux dimensions de l'écran (SCREEN_WIDTH, 
+    SCREEN_HEIGHT), et la stocke dans la variable globale menu_background.
+    Le cache d'images (images_cache) est réinitialisé au début.
+    """
     global menu_background, images_cache
     
     images_cache = {} 
@@ -90,6 +98,17 @@ def load_all_assets():
         menu_background = None
 
 def charger_image_salle(salle):
+    """
+    Charge une image de tuile de salle à partir du chemin spécifié et la stocke dans un cache.
+
+    Cette fonction gère le chargement de l'image pour un objet Salle (ou son dictionnaire équivalent)
+    en vérifiant d'abord si l'image est déjà présente dans le cache global (images_cache) 
+    avant de la charger depuis le disque. Elle tente de charger l'image à partir de plusieurs 
+    chemins d'accès courants ('images/', 'img/') et convertit la Surface Pygame pour l'affichage.
+    
+    :param salle: L'objet Salle ou le dictionnaire contenant l'attribut 'image_path'.
+    :return: Une surface Pygame chargée (pygame.Surface) si le chargement réussit, sinon None.
+    """
     global images_cache
     image_path = None
     
@@ -124,10 +143,21 @@ def charger_image_salle(salle):
     images_cache[image_path] = None
     return None
 
-# === GESTIONNAIRES D'OBJETS ET DE ROTATION ===
+# Gestionnaire d'objets et de rotations
 
 def salle_to_dict(salle):
-    
+    """
+    Convertit un objet Salle POO (ou un dictionnaire d'état) en un dictionnaire 
+    standardisé pour le stockage dans la grille de jeu.
+
+    Cette fonction assure la cohérence des données en extrayant les attributs de la salle,
+    charge l'image correspondante via charger_image_salle, et initialise les clés 
+    dynamiques nécessaires à l'affichage et à la rotation (comme 'rotation_angle', 'image_original').
+
+    :param salle: L'objet Salle (instance de classe) ou le dictionnaire à convertir.
+                Retourne un dictionnaire d'erreur si la salle est None.
+    :return: Un dictionnaire d'état complet de la pièce, prêt pour la grille.
+    """
     if salle is None:
         return {
             "nom": "PIECE NULLE",
@@ -157,7 +187,7 @@ def salle_to_dict(salle):
         # S'assurer que 'porte' est un dict, même si None est passé
         porte = salle.get('porte', {})
         if porte is None:
-             porte = {}
+            porte = {}
         objets_initiaux = salle.get('objets_initiaux', [])
         effet = salle.get('effet', None)
         visited = salle.get('visited', False)
@@ -172,7 +202,7 @@ def salle_to_dict(salle):
         # S'assurer que 'porte' est un dict, même si None est passé
         porte = getattr(salle, 'porte', {})
         if porte is None:
-             porte = {}
+            porte = {}
         objets_initiaux = list(getattr(salle, 'objets_initiaux', []))
         effet = getattr(salle, 'effet', None)
         visited = getattr(salle, 'visited', False)
@@ -206,6 +236,19 @@ def salle_to_dict(salle):
 
 
 def rotate_piece(piece_dict, angle_deg):
+    """
+    Applique une rotation à une pièce (dictionnaire d'état) pour aligner ses portes et son image.
+
+    Cette fonction prend en charge deux aspects cruciaux de la rotation:
+    1. Logique (Portes): Elle met à jour le dictionnaire 'porte' pour refléter les nouvelles directions 
+    des ouvertures suite à la rotation (90, 180, ou 270 degrés).
+    2. Visuel (Image): Elle utilise Pygame pour faire pivoter la surface graphique stockée ('image_original') 
+    et crée une nouvelle surface pour le rendu.
+
+    :param piece_dict: Le dictionnaire d'état de la pièce à faire pivoter.
+    :param angle_deg: L'angle de rotation en degrés (90, 180, ou 270).
+    :return: Une copie du dictionnaire de la pièce mise à jour avec la nouvelle orientation des portes et l'image tournée.
+    """
     rotated_piece = piece_dict.copy()
     
     portes_originales = piece_dict.get("porte", {})
@@ -245,9 +288,21 @@ def rotate_piece(piece_dict, angle_deg):
 
 
 def in_bounds(row, col):
+    """
+    Vérifie si les coordonnées (ligne et colonne) spécifiées se trouvent à l'intérieur 
+    des limites définies de la grille du manoir (ROWS x COLS).
+
+    Cette fonction est utilisée pour s'assurer que le joueur ne tente pas de se 
+    déplacer en dehors des murs extérieurs de la grille.
+
+    :param row: L'index de la ligne à vérifier.
+    :param col: L'index de la colonne à vérifier.
+    :return: True si (row, col) est dans la grille, False sinon.
+    """
+    
     return 0 <= row < ROWS and 0 <= col < COLS
 
-# === ETAT DU JEU (Variables Globales) ===
+# Etat du jeu (Variables Globales)
 player_pos = []
 grid = [[]]
 inventaire = None
@@ -272,6 +327,17 @@ just_cancelled_selection = False
 generateur_alea = None 
 
 def reset_game():
+    """
+    Réinitialise complètement l'état du jeu pour commencer une nouvelle partie.
+
+    Cette fonction effectue les étapes cruciales suivantes :
+    1. Réinitialise la position du joueur (player_pos) au point de départ (bas, centre).
+    2. Crée une nouvelle grille (grid) et initialise les objets POO (Inventaire, GenerateurAlea).
+    3. Place les pièces fixes : l'EntranceHall (salle de départ) et l'Antichambre (salle d'arrivée).
+    4. Reconstruit le catalogue_pieces complet en utilisant les fonctions creer_salles_...
+    5. Réinitialise toutes les variables d'état (choix_en_cours, menu_active, game_over, game_won) 
+    pour préparer le jeu à la boucle principale.
+    """
     global player_pos, grid, inventaire, catalogue_pieces, message_action, choix_en_cours
     global index_selection, pieces_proposees, intended_dir, menu_active, game_over, game_won
     global selected_move_direction, just_cancelled_selection, generateur_alea
@@ -282,14 +348,14 @@ def reset_game():
     inventaire = Inventaire() 
     generateur_alea = GenerateurAlea() 
 
-    # --- PLACEMENT DE L'ENTRANCE HALL (Bas Centre) ---
+    # PLACEMENT DE L'ENTRANCE HALL (Bas Centre)
     salle_depart_obj = EntranceHall()
     grid[player_pos[0]][player_pos[1]] = salle_to_dict(salle_depart_obj)
 
-    # --- AJOUT CRITIQUE : PLACEMENT DE L'ANTICHAMBRE (Haut Centre) ---
+    # AJOUT CRITIQUE : PLACEMENT DE L'ANTICHAMBRE (Haut Centre)
     salle_fin_obj = Antechamber()
     grid[0][COLS // 2] = salle_to_dict(salle_fin_obj) 
-    # -----------------------------------------------------------------
+    
 
     catalogue_pieces = []
     catalogue_pieces.extend(creer_salles_bleues())
@@ -312,9 +378,24 @@ def reset_game():
     game_over = False
     game_won = False
 
-# === LOGIQUE DE JEU ===
+# Logique du jeu
 
 def process_room_entry(room_dict):
+    """
+    Déclenche l'interaction immédiate avec une salle lors de la première entrée du joueur.
+
+    Cette fonction exécute les étapes suivantes :
+    1. Marque la salle comme 'visited' (visitée) pour éviter de redéclencher les effets initiaux.
+    2. Parcourt la liste 'objets_initiaux' de la salle, mettant à jour l'inventaire 
+    (gain de clés, gemmes, pièces d'or, pas, objets permanents) en fonction du type d'objet.
+    3. Analyse la chaîne de caractères 'effet' de la salle (si présente) pour appliquer 
+    des modifications de ressources spécifiques (ex: perte de pas, gain aléatoire).
+    4. Met à jour la variable globale 'message_action' avec un résumé des gains/pertes 
+    et vérifie l'état de victoire si l'effet 'Victoire' est détecté.
+
+    :param room_dict: Le dictionnaire d'état de la salle que le joueur vient d'entrer.
+    """
+    
     global inventaire, message_action, game_won
     
     if room_dict is None:
@@ -410,8 +491,19 @@ def process_room_entry(room_dict):
         message_action = message_effet
 
 
-# === DESSIN ===
+# Dessin
 def draw_start_screen():
+    """
+    Dessine l'écran d'accueil (menu principal) du jeu.
+
+    Cette fonction est responsable de :
+    1. Afficher l'image de fond du menu (menu_background) ou un fond Blueprint de secours.
+    2. Afficher le titre du jeu.
+    3. Dessiner le bouton 'JOUER' et appliquer un effet visuel (hover effect) basé sur la position de la souris.
+    4. Retourner l'objet pygame.Rect du bouton 'JOUER' pour permettre la détection des clics dans la boucle principale.
+
+    :return: L'objet pygame.Rect correspondant au bouton 'JOUER'.
+    """
     global play_button_rect, menu_background
 
     if menu_background:
@@ -451,6 +543,17 @@ def draw_start_screen():
     return play_button_rect
 
 def draw_grid():
+    """
+    Dessine l'état actuel de la grille du manoir sur l'écran Pygame.
+
+    Cette fonction itère sur la grille (ROWS x COLS) et est responsable de :
+    1. Dessiner le fond (BLUEPRINT_BG) et les bordures de la grille (BLUEPRINT_GRID_COLOR).
+    2. Afficher chaque tuile (TILE_SIZE) : soit l'image de la pièce découverte, soit un fond sombre 
+    (DARK_GRAY) si la pièce est inconnue.
+    3. Afficher un fond coloré ou le nom de la pièce si l'image n'est pas disponible.
+    4. Mettre en évidence la position actuelle du joueur (player_pos) avec un contour rouge (RED).
+    5. Afficher un indicateur de sélection de mouvement (YELLOW_CURSOR) si l'utilisateur a choisi une direction.
+    """
     screen.fill(BLUEPRINT_BG, pygame.Rect(0, 0, WIDTH, SCREEN_HEIGHT))
     for row in range(ROWS):
         for col in range(COLS):
@@ -493,6 +596,22 @@ def draw_grid():
 
 
 def draw_inventory(inv):
+    """
+    Dessine la zone d'inventaire complète, incluant les ressources, les objets permanents
+    et les boutons d'action AIDE et QUITTER.
+
+    Cette fonction est responsable de :
+    1. Effacer et dessiner le fond de la zone d'inventaire (style Blueprint).
+    2. Afficher la liste des ressources consommables (Pas, Gemmes, Clés, Dés, Pièces d'or)
+    en utilisant les attributs de l'objet Inventaire (inv).
+    3. Afficher les objets permanents possédés (Pelle, Crochetage, etc.).
+    4. Dessiner le message d'action actuel (message_action).
+    5. Calculer et dessiner les rectangles cliquables des boutons AIDE et QUITTER, 
+    en mettant à jour leurs variables globales associées (exit_button_rect, help_button_rect).
+    
+    :param inv: L'instance de la classe Inventaire contenant l'état des ressources du joueur.
+    :return: None.
+    """
     global exit_button_rect, help_button_rect
     x_start = WIDTH + 20
     y = 20
@@ -563,6 +682,16 @@ def draw_inventory(inv):
     screen.blit(exit_text, text_rect)
 
 def draw_selection_menu():
+    """
+    Dessine le menu de sélection de salle lorsque le joueur tente d'ouvrir une nouvelle porte.
+
+    Cette fonction est responsable de :
+    1. Afficher l'indication de la direction du mouvement visé (N, S, O, E).
+    2. Afficher jusqu'à trois options de pièces (pieces_proposees) tirées au sort.
+    3. Rendre les informations de chaque pièce, incluant le nom, la couleur, le niveau de rareté,
+    et le coût en gemmes.
+    4. Mettre en évidence (avec un contour rouge) la pièce actuellement sélectionnée par l'utilisateur.
+    """
     if not choix_en_cours:
         return
     dir_text = {(-1, 0): "N", (1, 0): "S", (0, -1): "O", (0, 1): "E"}.get(intended_dir, "Direction")
@@ -604,6 +733,16 @@ def draw_selection_menu():
         screen.blit(rarete_text, (text_x, y + 75))
 
 def draw_end_screen(titre, couleur):
+    """
+    Dessine un écran de fin de partie (Victoire ou Défaite) par-dessus l'état actuel du jeu.
+
+    Cette fonction crée un calque semi-transparent qui recouvre tout l'écran 
+    et affiche un message central, ainsi que les instructions pour rejouer ou quitter.
+
+    :param titre: La chaîne de caractères à afficher comme titre (ex: "VICTOIRE !", "DÉFAITE").
+    :param couleur: La couleur du titre (couleur) (ex: RED pour la défaite, GREEN pour la victoire).
+    :return: None.
+    """
     overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
     overlay.fill((0, 0, 0, 180))
     screen.blit(overlay, (0, 0))
@@ -621,15 +760,38 @@ def draw_end_screen(titre, couleur):
     screen.blit(inst_surf_2, inst_rect_2)
 
 def draw_game_over_screen():
+    """
+    Déclenche l'affichage de l'écran de Défaite (Game Over).
+
+    Cette fonction appelle draw_end_screen() avec le titre "DÉFAITE" et la couleur rouge (RED).
+    Elle gère l'état de fin de partie lorsque le joueur a épuisé ses Pas ou est bloqué.
+    """
     draw_end_screen("DÉFAITE", RED)
 
 def draw_win_screen():
+    """
+    Déclenche l'affichage de l'écran de Victoire.
+
+    Cette fonction appelle draw_end_screen() avec le titre "VICTOIRE !" et une couleur verte/claire
+    pour signaler la réussite de l'objectif (atteinte de l'Antichambre).
+    """
     draw_end_screen("VICTOIRE !", (100, 255, 100))
 
-# --- NOUVELLE FONCTION POUR VÉRIFIER LE BLOCAGE ---
+# Nouvelle fonction pour cerifier le blocage
 def check_for_blockade(current_r, current_c, inventaire, catalogue_pieces):
     """
     Vérifie si le joueur est complètement bloqué (ne peut plus se déplacer ou poser de nouvelle pièce).
+    Le joueur est bloqué si, à partir de sa position actuelle, il ne peut atteindre aucune
+    nouvelle salle ou salle existante car :
+    1. Tous les chemins mènent à un mur (interne ou externe).
+    2. Toutes les portes vers des cases non découvertes nécessitent une clé (Niveau 1 ou 2)
+    et le joueur n'a pas les ressources nécessaires (clés ou Kit de crochetage).
+
+    :param current_r: La ligne actuelle du joueur.
+    :param current_c: La colonne actuelle du joueur.
+    :param inventaire: L'objet Inventaire contenant les ressources du joueur.
+    :param catalogue_pieces: La liste des pièces restantes dans la pioche.
+    :return: True si le joueur est bloqué, False s'il existe au moins un chemin déverrouillé.
     """
     direction_map = {(-1, 0): "N", (1, 0): "S", (0, -1): "O", (0, 1): "E"}
     
@@ -640,7 +802,7 @@ def check_for_blockade(current_r, current_c, inventaire, catalogue_pieces):
         dy, dx = direction
         target_r, target_c = current_r + dy, current_c + dx
         
-        # 1. Vérification des limites et des murs internes (salle actuelle)
+        # Vérification des limites et des murs internes (salle actuelle)
         if not in_bounds(target_r, target_c):
             continue 
             
@@ -651,7 +813,7 @@ def check_for_blockade(current_r, current_c, inventaire, catalogue_pieces):
         target_room = grid[target_r][target_c]
         
         if target_room is not None:
-            # Possibilité de mouvement vers une salle EXISTANTE: NON BLOQUÉ
+            # Possibilité de mouvement vers une salle existante: non bloqué
             return False 
         
         else:
@@ -677,9 +839,23 @@ def check_for_blockade(current_r, current_c, inventaire, catalogue_pieces):
     # Si aucune issue trouvée, le joueur est bloqué.
     return True 
 
-# === LOGIQUE DE JEU PRINCIPALE ===
+# Logique du jeu principale
 
 def handle_move(direction):
+    """
+    Gère la tentative de déplacement du joueur dans une direction donnée (Haut, Bas, Gauche, Droite).
+
+    Cette fonction orchestre le flux de jeu en exécutant les vérifications suivantes :
+    1. Vérification de la défaite immédiate (Pas épuisés ou joueur bloqué).
+    2. Vérification des Murs (limites externes et portes internes manquantes).
+    3. Consommation du Pas (déduit au début de l'action, remboursé en cas d'échec d'ouverture de porte).
+    4. CAS SALLE EXISTANTE : Déplace le joueur et déclenche les effets d'entrée de salle (process_room_entry).
+    5. CAS NOUVELLE PORTE : Détermine le niveau de verrouillage (0, 1, ou 2) via GenerateurAlea, vérifie les ressources
+    (clés/Kit de Crochetage), consomme les ressources si l'ouverture est réussie, et lance le menu de tirage de pièces.
+
+    :param direction: Tuple (dy, dx) représentant la direction du mouvement.
+    :return: True si l'action aboutit (déplacement ou lancement du tirage), False en cas de blocage ou défaite.
+    """
     global choix_en_cours, pieces_proposees, index_selection, intended_dir, message_action, inventaire, player_pos, grid, game_over, generateur_alea
     dy, dx = direction
     current_r, current_c = player_pos
@@ -726,7 +902,7 @@ def handle_move(direction):
         message_action = f"Déplacement vers {target_room['nom']} ({inventaire.pas} pas restants)."
         process_room_entry(target_room)
         
-        # VÉRIFICATION DE BLOCAGE (Après l'entrée dans une pièce)
+        # Vérification de verouillage (Après l'entrée dans une pièce)
         r, c = player_pos
         if check_for_blockade(r, c, inventaire, catalogue_pieces):
             message_action = "💀 Défaite : Vous êtes complètement bloqué. Plus de chemins disponibles ou manquants de ressources clés/pièces."
@@ -737,7 +913,7 @@ def handle_move(direction):
     else:
         # Ouverture d'une nouvelle porte (vérification de verrouillage)
 
-        # 1. DÉTERMINER LE NIVEAU DE VERROUILLAGE (Logique fixe par rangée)
+        # Déterminer le niveau de verouillage (Logique fixe par rangée)
         niveau_verrouillage = generateur_alea.tirer_niveau_verrouillage(target_r)
 
         cle_utilisee = False
@@ -760,7 +936,7 @@ def handle_move(direction):
                 message_action = "Porte verrouillée simple (Niveau 1)! Nécessite 🔑 ou Kit de Crochetage."
                 inventaire.gagner_pas(1) # Rembourser le pas
                 
-                # VÉRIFICATION DE BLOCAGE APRES L'ÉCHEC
+                # Verification de blocage apres erreur
                 if check_for_blockade(current_r, current_c, inventaire, catalogue_pieces):
                     message_action = "💀 Défaite : Vous êtes bloqué. Plus de chemins disponibles ou manquants de ressources clés/pièces."
                     game_over = True
@@ -777,13 +953,13 @@ def handle_move(direction):
                 message_action = "Porte verrouillée double tour (Niveau 2)! Nécessite 🔑."
                 inventaire.gagner_pas(1) # Rembourser le pas
                 
-                # VÉRIFICATION DE BLOCAGE APRES L'ÉCHEC
+                # Verification de blocage
                 if check_for_blockade(current_r, current_c, inventaire, catalogue_pieces):
                     message_action = "💀 Défaite : Vous êtes bloqué. Plus de chemins disponibles ou manquants de ressources clés/pièces."
                     game_over = True
                 return False
         
-        # 2. La porte est ouverte. On procède au tirage de pièce.
+        # La porte est ouverte => tirage de pièce
 
         if not catalogue_pieces:
             message_action += "\nImpasse... La pioche est vide."
@@ -793,7 +969,7 @@ def handle_move(direction):
             
         pieces_proposees.clear()
         
-        # DÉTERMINER LA DIRECTION CIBLE
+        # Determiner la direction cible
         dir_cible = direction_map.get(direction)
         
         # TIRER LES PIÈCES (via la méthode de l'instance GenerateurAlea)
@@ -804,7 +980,7 @@ def handle_move(direction):
             inventaire.gagner_pas(1) # Rembourser le pas
             game_over = True
             return False
-                 
+            
         index_selection = 0
         choix_en_cours = True
         intended_dir = direction
@@ -814,6 +990,20 @@ def handle_move(direction):
         return True
 
 def place_selected_piece(idx):
+    """
+    Exécute le placement définitif de la pièce choisie par le joueur dans le manoir.
+
+    Cette fonction est appelée après qu'une pièce ait été sélectionnée dans le menu de tirage et est responsable de :
+    1. Vérifier si le joueur possède suffisamment de gemmes pour couvrir le coût (cout_gem). En cas d'échec, le pas consommé pour l'ouverture de la porte est remboursé.
+    2. Retirer la pièce sélectionnée du catalogue global (pioche).
+    3. Calculer l'angle de rotation dynamique nécessaire pour que la porte d'entrée de la nouvelle pièce s'aligne avec la porte de la salle précédente.
+    4. Confirmer que la pièce, une fois tournée, possède bien une porte active pour la connexion. Si non, l'action est annulée et le pas est remboursé.
+    5. Placer le dictionnaire d'état de la pièce (piece_dict) dans la grille.
+    6. Déduire le coût en gemmes, mettre à jour la position du joueur (player_pos), et déclencher les effets d'entrée de la salle (process_room_entry).
+
+    :param idx: L'index de la pièce sélectionnée dans la liste temporaire pieces_proposees.
+    :return: True si le placement est réussi et le jeu continue, False en cas d'erreur ou d'annulation.
+    """
     global choix_en_cours, intended_dir, message_action, inventaire, catalogue_pieces, player_pos, grid
     
     if not pieces_proposees or idx >= len(pieces_proposees):
@@ -843,7 +1033,7 @@ def place_selected_piece(idx):
         choix_en_cours = False
         intended_dir = None
         return False
-   
+    
     piece_dict = piece_info
 
     direction_map = {(-1, 0): "N", (1, 0): "S", (0, -1): "O", (0, 1): "E"}
@@ -893,7 +1083,7 @@ def place_selected_piece(idx):
     intended_dir = None
     return True
 
-# === BOUCLE PRINCIPALE ===
+# Boucle principale
 load_all_assets()
 reset_game() 
 
@@ -948,7 +1138,7 @@ while True:
                         if pieces_proposees:
                             place_selected_piece(index_selection)
                     
-                    # --- LOGIQUE: UTILISATION DES DÉS (TOUCHE R) ---
+                    # Logique: utilisation des clés (Touche R)
                     elif event.key == pygame.K_r: 
                         if inventaire.des > 0:
                             inventaire.des -= 1
@@ -964,7 +1154,7 @@ while True:
                             message_action = f"Dé utilisé! Nouveau tirage de pièces ({inventaire.des} dés restants)."
                         else:
                             message_action = "Vous n'avez pas de dés pour relancer le tirage."
-                    # --- FIN LOGIQUE ---
+                    
         
                     
                     elif event.key == pygame.K_ESCAPE:
@@ -974,7 +1164,7 @@ while True:
                     if event.key == pygame.K_ESCAPE:
                         pygame.quit(); sys.exit()
                         
-              
+
                     if event.key in (pygame.K_z, pygame.K_UP):
                         selected_move_direction = (-1, 0)
                         message_action = "Direction HAUT sélectionnée. Appuyez sur Espace."
@@ -995,7 +1185,7 @@ while True:
                         else:
                             message_action = "Veuillez d'abord choisir une direction (ZQSD)."
 
-    # === LOGIQUE D'AFFICHAGE (basée sur l'état) ===
+    # Logique d'affichage (basée sur l'état)
     if menu_active:
         play_button_rect = draw_start_screen()
     

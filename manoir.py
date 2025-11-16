@@ -108,7 +108,7 @@ class Manoir:
 
         # Vérifie si une porte existe dans la salle actuelle
         if not current_room or not current_room.porte.get(direction, False):
-             return False, "Mur interne : La salle n'a pas de porte dans cette direction."
+            return False, "Mur interne : La salle n'a pas de porte dans cette direction."
         
         cle_porte = tuple(sorted((self.joueur.position, pos_nouv)))
         porte = self.portes.get(cle_porte)
