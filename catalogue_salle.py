@@ -534,7 +534,7 @@ def creer_salles_rouge():
             cout_gem=0,
             rarete=2, 
             condition_placement="Aucune",
-            porte={"N": False, "S": True, "E": False, "O": True}, 
+            porte={"N": True, "S": True, "E": True, "O": True}, 
             objets_initiaux=[], 
             effet="Permet d'échanger 5 pas cpntre 1 dé. Perte de la moitié des pas",
             default_entry_direction="S"),

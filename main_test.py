@@ -121,29 +121,35 @@ def charger_image_salle(salle):
 # === GESTIONNAIRES D'OBJETS ET DE ROTATION ===
 
 def salle_to_dict(salle):
+    """
+    Transforme un objet salle en dict exploitable par le jeu.
+    Si c'est déjà un dict, on le renvoie tel quel (protection contre double conversion).
+    """
+    # Si c'est déjà un dict avec les clés attendues, renvoie-le directement
+    if isinstance(salle, dict) and "nom" in salle and "porte" in salle:
+        # Vérifie que l'image est bien chargée
+        if "image" in salle and salle["image"] is None and salle.get("image_path"):
+            salle["image"] = charger_image_salle(salle)
+            if salle["image"]:
+                try:
+                    salle["image_original"] = pygame.transform.smoothscale(salle["image"], (TILE_SIZE, TILE_SIZE))
+                    salle["image"] = salle["image_original"]
+                except Exception:
+                    salle["image_original"] = None
+        return salle
+
+    # Sinon c'est un objet salle → transforme en dict
     img_chargee = charger_image_salle(salle)
 
-    if isinstance(salle, dict):
-        default_entry = salle.get("default_entry_direction", "S")
-        nom = salle.get('nom', '???')
-        couleur = salle.get('couleur', 'bleue')
-        image_path = salle.get('image_path', None)
-        cout_gem = salle.get('cout_gem', 0)
-        rarete = salle.get('rarete', 0)
-        porte = salle.get('porte', {})
-        objets_initiaux = salle.get('objets_initiaux', [])
-        effet = salle.get('effet', None)
-        
-    else:
-        default_entry = getattr(salle, "default_entry_direction", "S")
-        nom = getattr(salle, 'nom', '???')
-        couleur = getattr(salle, 'couleur', 'bleue')
-        image_path = getattr(salle, 'image_path', None)
-        cout_gem = getattr(salle, 'cout_gem', 0)
-        rarete = getattr(salle, 'rarete', 0)
-        porte = getattr(salle, 'porte', {})
-        objets_initiaux = list(getattr(salle, 'objets_initiaux', []))
-        effet = getattr(salle, 'effet', None)
+    nom = getattr(salle, 'nom', '???')
+    couleur = getattr(salle, 'couleur', 'bleue')
+    image_path = getattr(salle, 'image_path', None)
+    cout_gem = getattr(salle, 'cout_gem', 0)
+    rarete = getattr(salle, 'rarete', 0)
+    porte = getattr(salle, 'porte', {})
+    objets_initiaux = list(getattr(salle, 'objets_initiaux', []))
+    effet = getattr(salle, 'effet', None)
+    default_entry = getattr(salle, 'default_entry_direction', "S")
 
     piece_dict = {
         "nom": nom,
@@ -156,18 +162,20 @@ def salle_to_dict(salle):
         "objets_initiaux": objets_initiaux,
         "effet": effet,
         "rotation_angle": 0,
-        "default_entry_direction": default_entry
+        "default_entry_direction": default_entry,
+        "visited": False
     }
-    
-    if piece_dict.get("image"):
+
+    # Redimensionne l'image si elle existe
+    if piece_dict["image"]:
         try:
             piece_dict["image_original"] = pygame.transform.smoothscale(piece_dict["image"], (TILE_SIZE, TILE_SIZE))
             piece_dict["image"] = piece_dict["image_original"]
         except Exception as e:
-            print(f"Erreur de scaling image pour {piece_dict['nom']}: {e}")
+            print(f"[WARN] Erreur de scaling image pour {nom}: {e}")
             piece_dict["image"] = None
             piece_dict["image_original"] = None
-        
+
     return piece_dict
 
 def rotate_piece(piece_dict, angle_deg):
@@ -219,10 +227,10 @@ def tirer_pieces(catalogue, n=3):
     try:
         poids_total = sum(poids_list)
         if poids_total == 0:
-             poids_norm = None 
+            poids_norm = None 
         else:
-             poids_norm = np.array(poids_list) / poids_total
-             
+            poids_norm = np.array(poids_list) / poids_total
+            
         tirage = np.random.choice(pieces_list, size=n, p=poids_norm,
                                 replace=False if len(pieces_list) >= n and n > 0 else True).tolist()
     except Exception as e:
@@ -290,9 +298,10 @@ def reset_game():
 def process_room_entry(room_dict):
     global inventaire, message_action, game_won
     
-    if room_dict is None:
+    if room_dict is None or room_dict.get("visited", False):
         return
-
+    
+    room_dict["visited"] = True
     objets_a_retirer = []
     objets_gagnes = []
     message_effet = ""
@@ -417,8 +426,13 @@ def draw_grid():
             if piece:
                 image = piece.get("image")
                 if image:
-                    screen.blit(image, (x, y)) 
+                    try:
+                        screen.blit(image, (x, y))
+                    except Exception as e:
+                        print(f"[ERROR] Impossible de blitter la pièce '{piece.get('nom', '???')}': {e}")
+                        pygame.draw.rect(screen, PIECE_COLORS.get(piece.get("couleur", "bleue"), GRAY), rect)
                 else:
+                    # Dessine un rectangle de couleur si pas d'image
                     couleur = piece.get("couleur", "bleue")
                     color = PIECE_COLORS.get(couleur, GRAY)
                     pygame.draw.rect(screen, color, rect)
@@ -429,11 +443,10 @@ def draw_grid():
             pygame.draw.rect(screen, BLUEPRINT_GRID_COLOR, rect, 1)
     grid_rect_full = pygame.Rect(0, 0, WIDTH, SCREEN_HEIGHT)
     pygame.draw.rect(screen, BLUEPRINT_GRID_COLOR, grid_rect_full, 4)
-    global_rect = pygame.Rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT)
-    pygame.draw.rect(screen, WHITE, global_rect, 5)
     
     r, c = player_pos
     pygame.draw.rect(screen, RED, pygame.Rect(c * TILE_SIZE, r * TILE_SIZE, TILE_SIZE, TILE_SIZE), 4)
+
 
 def draw_inventory(inv):
     global exit_button_rect, help_button_rect
@@ -610,10 +623,10 @@ def handle_move(direction):
         pieces_proposees.extend(tirer_pieces(catalogue_pieces, n=3))
         
         if not pieces_proposees:
-             message_action = "Impasse... La pioche est vide."
-             game_over = True
-             return False
-             
+            message_action = "Impasse... La pioche est vide."
+            game_over = True
+            return False
+        
         index_selection = 0
         choix_en_cours = True
         intended_dir = direction
