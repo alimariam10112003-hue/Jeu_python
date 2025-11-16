@@ -516,7 +516,7 @@ def draw_selection_menu():
     if not choix_en_cours:
         return
     dir_text = {(-1, 0): "Vers le HAUT", (1, 0): "Vers le BAS", (0, -1): "Vers la GAUCHE", (0, 1): "Vers la DROITE"}.get(intended_dir, "Direction")
-    x_base = WIDTH + 20; y_start = 150
+    x_base = WIDTH + 20; y_start = 500
     title = font.render(f"Choix ({dir_text})", True, BLUEPRINT_TEXT_COLOR)
     screen.blit(title, (x_base, y_start - 40))
     
