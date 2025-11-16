@@ -19,7 +19,7 @@ from catalogue_salle import (
 from objets import *
 from aleatoire import GenerateurAlea 
 
-
+# Dimensions de la grille du manoir
 ROWS, COLS = 9, 5
 
 pygame.init()
@@ -27,11 +27,13 @@ info = pygame.display.Info()
 SCREEN_WIDTH = info.current_w
 SCREEN_HEIGHT = info.current_h
 
+# Calcul des dimensions des éléments d'affichage
 TILE_SIZE = SCREEN_HEIGHT // ROWS
 WIDTH = TILE_SIZE * COLS
 INVENTORY_WIDTH = SCREEN_WIDTH - WIDTH
 SCREEN_HEIGHT = TILE_SIZE * ROWS 
 
+# Définition des couleurs
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 RED = (255, 100, 100)
@@ -50,10 +52,12 @@ PIECE_COLORS = {
     "orange": (255, 165, 0), "rouge": (255, 100, 100), "jaune": (255, 255, 100),
 }
 
+# Configuration de la fenêtre et du temps
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.FULLSCREEN)
 pygame.display.set_caption("Blue Prince - Interface Fusionnée")
 clock = pygame.time.Clock()
 
+# Initialisation des polices
 try:
     font_emoji = pygame.font.SysFont('segoeuiemoji', 28)
 except Exception:
@@ -65,7 +69,7 @@ font_button = pygame.font.SysFont(None, 60, bold=True)
 font_game_over = pygame.font.SysFont(None, 100, bold=True) 
 
 
-# === GESTIONNAIRES D'IMAGES ===
+# Gestion image
 menu_background = None
 images_cache = {}
 
@@ -124,7 +128,7 @@ def charger_image_salle(salle):
     images_cache[image_path] = None
     return None
 
-# === GESTIONNAIRES D'OBJETS ET DE ROTATION ===
+#Gestion objets et rotation
 
 def salle_to_dict(salle):
     
@@ -147,6 +151,7 @@ def salle_to_dict(salle):
 
     img_chargee = charger_image_salle(salle)
 
+    # Extraction des attributs
     if isinstance(salle, dict):
         default_entry = salle.get("default_entry_direction", "S")
         nom = salle.get('nom', '???')
@@ -154,6 +159,7 @@ def salle_to_dict(salle):
         image_path = salle.get('image_path', None)
         cout_gem = salle.get('cout_gem', 0)
         rarete = salle.get('rarete', 0)
+
         # S'assurer que 'porte' est un dict, même si None est passé
         porte = salle.get('porte', {})
         if porte is None:
@@ -206,6 +212,9 @@ def salle_to_dict(salle):
 
 
 def rotate_piece(piece_dict, angle_deg):
+    """
+    Fait pivoter logiquement (portes) et visuellement (image) une pièce.
+    """
     rotated_piece = piece_dict.copy()
     
     portes_originales = piece_dict.get("porte", {})
@@ -225,6 +234,7 @@ def rotate_piece(piece_dict, angle_deg):
         rotated_piece["rotation_angle"] = 0
         return rotated_piece 
     
+    # Applique la rotation aux connexions de portes
     for old_dir, new_dir in rotation_map.items():
         portes_rotatives[new_dir] = portes_originales.get(old_dir, False)
         
@@ -689,7 +699,7 @@ def handle_move(direction):
     dir_key = direction_map.get(direction)
     
     if inventaire.pas <= 0:
-        message_action = "💀 Défaite : vous n'avez plus de pas!"
+        message_action = "Défaite : vous n'avez plus de pas!"
         game_over = True 
         return False
     
@@ -697,7 +707,7 @@ def handle_move(direction):
         message_action = "Mur extérieur : Limite du manoir atteinte."
         # Vérification si cette tentative de mouvement non-valide aurait dû révéler un blocage complet
         if check_for_blockade(current_r, current_c, inventaire, catalogue_pieces):
-            message_action = "💀 Défaite : Vous êtes complètement bloqué. Plus de chemins disponibles ou manquants de ressources clés/pièces."
+            message_action = "Défaite : Vous êtes complètement bloqué. Plus de chemins disponibles ou manquants de ressources clés/pièces."
             game_over = True
         return False
         
@@ -706,7 +716,7 @@ def handle_move(direction):
         message_action = f"Mur interne : La salle '{current_room['nom']}' n'a pas de porte vers {dir_key}."
         # Vérification si cette tentative de mouvement non-valide aurait dû révéler un blocage complet
         if check_for_blockade(current_r, current_c, inventaire, catalogue_pieces):
-            message_action = "💀 Défaite : Vous êtes complètement bloqué. Plus de chemins disponibles ou manquants de ressources clés/pièces."
+            message_action = "Défaite : Vous êtes complètement bloqué. Plus de chemins disponibles ou manquants de ressources clés/pièces."
             game_over = True
         return False
         
@@ -715,7 +725,7 @@ def handle_move(direction):
     # Dépenser le pas (sera remboursé en cas d'échec de l'ouverture de porte)
     inventaire.depenser_pas(1)
     if inventaire.pas <= 0:
-        message_action = "💀 Défaite : vous n'avez plus de pas!"
+        message_action = "Défaite : vous n'avez plus de pas!"
         game_over = True 
         pygame.event.clear(pygame.KEYDOWN)
         return False 
@@ -729,7 +739,7 @@ def handle_move(direction):
         # VÉRIFICATION DE BLOCAGE (Après l'entrée dans une pièce)
         r, c = player_pos
         if check_for_blockade(r, c, inventaire, catalogue_pieces):
-            message_action = "💀 Défaite : Vous êtes complètement bloqué. Plus de chemins disponibles ou manquants de ressources clés/pièces."
+            message_action = "Défaite : Vous êtes complètement bloqué. Plus de chemins disponibles ou manquants de ressources clés/pièces."
             game_over = True
             return False
         
@@ -750,19 +760,19 @@ def handle_move(direction):
             # Porte verrouillée simple (Niveau 1)
             if inventaire.possede_kit_crochetage: 
                 kit_crochetage_utilise = True
-                message_action = "Porte verrouillée simple (Niveau 1).\nKit de Crochetage utilisé pour l'ouvrir!."
+                message_action = "Porte verrouillée simple (Niveau 1).\n Kit de Crochetage utilisé pour l'ouvrir!."
             elif inventaire.cles > 0:
                 inventaire.retirer_cle(1)
                 cle_utilisee = True
-                message_action = "Porte verrouillée simple (Niveau 1).\n🔑 Clé dépensée pour l'ouvrir!."
+                message_action = "Porte verrouillée simple (Niveau 1).\n Clé dépensée pour l'ouvrir!."
             else:
                 # Échec de l'ouverture
-                message_action = "Porte verrouillée simple (Niveau 1)! Nécessite 🔑 ou Kit de Crochetage."
+                message_action = "Porte verrouillée simple (Niveau 1)! Nécessite Clé ou Kit de Crochetage."
                 inventaire.gagner_pas(1) # Rembourser le pas
                 
                 # VÉRIFICATION DE BLOCAGE APRES L'ÉCHEC
                 if check_for_blockade(current_r, current_c, inventaire, catalogue_pieces):
-                    message_action = "💀 Défaite : Vous êtes bloqué. Plus de chemins disponibles ou manquants de ressources clés/pièces."
+                    message_action = "Défaite : Vous êtes bloqué. Plus de chemins disponibles ou manquants de ressources clés/pièces."
                     game_over = True
                 return False
                 
@@ -771,15 +781,15 @@ def handle_move(direction):
             if inventaire.cles > 0:
                 inventaire.retirer_cle(1)
                 cle_utilisee = True
-                message_action = "Porte verrouillée double tour (Niveau 2).\n🔑 Clé dépensée pour l'ouvrir!."
+                message_action = "Porte verrouillée double tour (Niveau 2).\n Clé dépensée pour l'ouvrir!."
             else:
                 # Échec de l'ouverture
-                message_action = "Porte verrouillée double tour (Niveau 2)! Nécessite 🔑."
+                message_action = "Porte verrouillée double tour (Niveau 2)! Nécessite Clé."
                 inventaire.gagner_pas(1) # Rembourser le pas
                 
                 # VÉRIFICATION DE BLOCAGE APRES L'ÉCHEC
                 if check_for_blockade(current_r, current_c, inventaire, catalogue_pieces):
-                    message_action = "💀 Défaite : Vous êtes bloqué. Plus de chemins disponibles ou manquants de ressources clés/pièces."
+                    message_action = "Défaite : Vous êtes bloqué. Plus de chemins disponibles ou manquants de ressources clés/pièces."
                     game_over = True
                 return False
         
@@ -937,7 +947,7 @@ while True:
                     pygame.quit(); sys.exit()
                 if help_button_rect.collidepoint(mouse_pos):
                     choix_en_cours = False
-                    message_action = "AIDE: Déplacez-vous avec ZQSD ou les flèches.\nTrouvez l'Antichambre pour gagner."
+                    message_action = "AIDE: Déplacez-vous avec ZQSD ou les flèches (R pour Dé).\nTrouvez l'Antichambre pour gagner."
             if event.type == pygame.KEYDOWN:
                 if choix_en_cours:
                     if event.key in (pygame.K_UP, pygame.K_z):
