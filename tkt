@@ -17,7 +17,6 @@ from catalogue_salle import (
     creer_salles_rouge
 )
 from objets import *
-from aleatoire import GenerateurAlea 
 
 
 ROWS, COLS = 9, 5
@@ -107,7 +106,6 @@ def charger_image_salle(salle):
     if image_path in images_cache:
         return images_cache[image_path]
 
-    
     possibles = [image_path, os.path.join("images", image_path), os.path.join("img", image_path)]
     for p in possibles:
         if os.path.exists(p):
@@ -188,7 +186,7 @@ def salle_to_dict(salle):
         "objets_initiaux": objets_initiaux,
         "effet": effet,
         "rotation_angle": 0,
-        "default_entry_direction": "S",
+        "default_entry_direction": default_entry,
         "visited": visited
     }
     
@@ -240,8 +238,114 @@ def rotate_piece(piece_dict, angle_deg):
         rotated_rect = rotated_img.get_rect(center = dest_center)
         final_surface.blit(rotated_img, rotated_rect)
         rotated_piece["image"] = final_surface
-        
+    
     return rotated_piece
+
+def tirer_pieces(catalogue, n=3, dir_cible=None):
+    """
+    Tirage des pièces, favorisant les pièces avec une porte dans la direction cible (dir_cible)
+    et garantissant une pièce gratuite stratégique si besoin pour la progression NORD.
+    """
+    pieces_list = []; poids_list = []
+    
+    # MODIFICATION: Augmentation du boost pour surmonter la rareté et les blocages
+    BOOST_FACTOR = 500 
+    
+    # 1. Préparation de la pioche pondérée
+    for piece in catalogue:
+        if piece is None: continue
+        
+        if hasattr(piece, 'rarete'):
+            rarete = piece.rarete; cout_gem = piece.cout_gem; porte = piece.porte
+        else:
+            rarete = piece.get("rarete", 0); cout_gem = piece.get("cout_gem", 0)
+            porte = piece.get("porte", {})
+            
+        poids = 1.0 / (3 ** rarete)
+        
+        # Logique de BOOST
+        if dir_cible and porte.get(dir_cible) is True:
+            poids *= BOOST_FACTOR
+            
+        pieces_list.append(piece); poids_list.append(poids)
+        
+    if not pieces_list: return []
+    
+    pieces_proposees = []
+    
+    # =================================================================
+    # 2. LOGIQUE DE GARANTIE : SÉLECTIONNER ET RETIRER LA PIÈCE GRATUITE STRATÉGIQUE
+    # =================================================================
+    
+    # Filtrer les pièces gratuites
+    pieces_gratuites_disponibles = [p for p in pieces_list if (hasattr(p, 'cout_gem') and p.cout_gem == 0) or (isinstance(p, dict) and p.get("cout_gem", 0) == 0)]
+    
+    piece_garantie = None
+    
+    if pieces_gratuites_disponibles:
+        # Priorité 1: Pièce Gratuite NORD/SUD si l'on vise le NORD
+        if dir_cible == 'N':
+            pieces_gratuites_NORD_PROGRESSION = []
+            for p in pieces_gratuites_disponibles:
+                # S'assurer que les portes N et S sont ouvertes pour permettre de continuer
+                porte = p.porte if hasattr(p, 'porte') else p.get('porte', {})
+                if porte.get('N') is True and porte.get('S') is True:
+                    pieces_gratuites_NORD_PROGRESSION.append(p)
+            
+            if pieces_gratuites_NORD_PROGRESSION:
+                # Tirage pondéré parmi les pièces NORD/SUD pour tenir compte des raretés (même si gratuites)
+                indices_progression = [pieces_list.index(p) for p in pieces_gratuites_NORD_PROGRESSION]
+                poids_progression = [poids_list[i] for i in indices_progression]
+                
+                if sum(poids_progression) > 0:
+                    piece_garantie = random.choices(pieces_gratuites_NORD_PROGRESSION, weights=poids_progression, k=1)[0]
+                else:
+                    piece_garantie = random.choice(pieces_gratuites_NORD_PROGRESSION)
+        
+        # Priorité 2: N'importe quelle pièce gratuite (si le tirage NORD stratégique a échoué ou n'est pas ciblé)
+        if piece_garantie is None:
+            piece_garantie = random.choice(pieces_gratuites_disponibles)
+            
+    # Si une pièce est garantie, l'ajouter aux propositions et la retirer de la pioche
+    if piece_garantie:
+        pieces_proposees.append(piece_garantie)
+        
+        try:
+            # Trouver l'index de la pièce garantie dans la pioche initiale
+            index_a_retirer = pieces_list.index(piece_garantie)
+            
+            # Retirer l'élément et son poids de la liste
+            pieces_list.pop(index_a_retirer)
+            poids_list.pop(index_a_retirer)
+        except ValueError:
+            pass # Ne devrait pas arriver
+            
+    # =================================================================
+    # 3. TIRAGE ALÉATOIRE PONDÉRÉ DU RESTE DES PIÈCES
+    # =================================================================
+    
+    pieces_restantes_a_tirer = n - len(pieces_proposees)
+    
+    if pieces_restantes_a_tirer > 0 and pieces_list:
+        poids_total = sum(poids_list)
+        if poids_total > 0:
+            poids_norm = np.array(poids_list) / poids_total
+            
+            try:
+                # Tirage pondéré des pièces restantes (sans remplacement)
+                tirage_pondere = np.random.choice(pieces_list, size=pieces_restantes_a_tirer, p=poids_norm, 
+                                                 replace=False if len(pieces_list) >= pieces_restantes_a_tirer else True).tolist()
+                pieces_proposees.extend(tirage_pondere)
+            except Exception as e:
+                # Fallback simple
+                print(f"Erreur de tirage pondéré final: {e}")
+                pieces_proposees.extend(random.sample(pieces_list, min(pieces_restantes_a_tirer, len(pieces_list))))
+        else:
+            # Fallback: Tirage aléatoire sans pondération si les poids sont tous nuls
+            pieces_proposees.extend(random.sample(pieces_list, min(pieces_restantes_a_tirer, len(pieces_list))))
+
+    # S'assurer que le nombre final de pièces n'excède pas 'n'
+    return pieces_proposees[:n]
 
 
 def in_bounds(row, col):
@@ -269,18 +373,15 @@ game_won = False
 
 just_cancelled_selection = False
 
-generateur_alea = None 
-
 def reset_game():
     global player_pos, grid, inventaire, catalogue_pieces, message_action, choix_en_cours
     global index_selection, pieces_proposees, intended_dir, menu_active, game_over, game_won
-    global selected_move_direction, just_cancelled_selection, generateur_alea
+    global selected_move_direction, just_cancelled_selection
     
     player_pos = [ROWS - 1, COLS // 2]
     grid = [[None for _ in range(COLS)] for _ in range(ROWS)]
     
     inventaire = Inventaire() 
-    generateur_alea = GenerateurAlea() 
 
     # --- PLACEMENT DE L'ENTRANCE HALL (Bas Centre) ---
     salle_depart_obj = EntranceHall()
@@ -424,7 +525,6 @@ def draw_start_screen():
         for y in range(0, SCREEN_HEIGHT, step):
             pygame.draw.line(screen, BLUEPRINT_GRID_COLOR, (0, y), (SCREEN_WIDTH, y), 1)
 
-    
     title_surf = font_title.render("BLUE PRINCE", True, BLUEPRINT_TEXT_COLOR)
     screen.blit(title_surf, ((SCREEN_WIDTH - title_surf.get_width()) // 2, SCREEN_HEIGHT // 4))
 
@@ -468,7 +568,6 @@ def draw_grid():
                 else:
                     couleur = piece.get("couleur", "bleue")
                     color = PIECE_COLORS.get(couleur, GRAY)
-                
                     pygame.draw.rect(screen, color, rect)
                     text = font_small.render(piece.get("nom", "???"), True, WHITE)
                     screen.blit(text, (x + 5, y + 5))
@@ -516,12 +615,7 @@ def draw_inventory(inv):
     max_width = INVENTORY_WIDTH - 20
     for name, icon, value in resources:
         name_text = font.render(name, True, BLUEPRINT_TEXT_COLOR)
-        try:
-            val_icon_text = font_emoji.render(f"{value} {icon}", True, BLUEPRINT_TEXT_COLOR)
-        except:
-            # Fallback si le rendu emoji échoue
-            val_icon_text = font.render(f"{value}", True, BLUEPRINT_TEXT_COLOR)
-            
+        val_icon_text = font_emoji.render(f"{value} {icon}", True, BLUEPRINT_TEXT_COLOR)
         screen.blit(name_text, (x_start, y))
         val_icon_x = WIDTH + max_width - val_icon_text.get_width()
         screen.blit(val_icon_text, (val_icon_x, y))
@@ -541,7 +635,6 @@ def draw_inventory(inv):
     
     for name, possede in permanent_items:
         if possede:
-            
             text = font_small.render(name.upper(), True, BLUEPRINT_TEXT_COLOR)
             screen.blit(text, (x_start + 10, y)); y += 25
 
@@ -565,7 +658,7 @@ def draw_inventory(inv):
 def draw_selection_menu():
     if not choix_en_cours:
         return
-    dir_text = {(-1, 0): "N", (1, 0): "S", (0, -1): "O", (0, 1): "E"}.get(intended_dir, "Direction")
+    dir_text = {(-1, 0): "Vers le HAUT", (1, 0): "Vers le BAS", (0, -1): "Vers la GAUCHE", (0, 1): "Vers la DROITE"}.get(intended_dir, "Direction")
     x_base = WIDTH + 20; y_start = 500
     title = font.render(f"Choix ({dir_text})", True, BLUEPRINT_TEXT_COLOR)
     screen.blit(title, (x_base, y_start - 40))
@@ -626,65 +719,13 @@ def draw_game_over_screen():
 def draw_win_screen():
     draw_end_screen("VICTOIRE !", (100, 255, 100))
 
-# --- NOUVELLE FONCTION POUR VÉRIFIER LE BLOCAGE ---
-def check_for_blockade(current_r, current_c, inventaire, catalogue_pieces):
-    """
-    Vérifie si le joueur est complètement bloqué (ne peut plus se déplacer ou poser de nouvelle pièce).
-    """
-    direction_map = {(-1, 0): "N", (1, 0): "S", (0, -1): "O", (0, 1): "E"}
-    
-    can_place_new_room = len(catalogue_pieces) > 0
-    
-    # Vérifier toutes les 4 directions
-    for direction, dir_key in direction_map.items():
-        dy, dx = direction
-        target_r, target_c = current_r + dy, current_c + dx
-        
-        # 1. Vérification des limites et des murs internes (salle actuelle)
-        if not in_bounds(target_r, target_c):
-            continue 
-            
-        current_room = grid[current_r][current_c]
-        if current_room and current_room.get("porte", {}).get(dir_key) is not True:
-            continue 
-            
-        target_room = grid[target_r][target_c]
-        
-        if target_room is not None:
-            # Possibilité de mouvement vers une salle EXISTANTE: NON BLOQUÉ
-            return False 
-        
-        else:
-            # Tentative de PLACER une nouvelle salle
-            if not can_place_new_room:
-                continue 
-                
-            # Déterminer le niveau de verrouillage de la porte vers la cible
-            niveau_verrouillage = generateur_alea.tirer_niveau_verrouillage(target_r)
-            
-            if niveau_verrouillage == 0:
-                # Niveau 0: Toujours possible de placer
-                return False 
-            elif niveau_verrouillage == 1:
-                # Niveau 1: Possible avec Clé ou Kit
-                if inventaire.cles > 0 or inventaire.possede_kit_crochetage:
-                    return False
-            elif niveau_verrouillage == 2:
-                # Niveau 2: Possible seulement avec Clé
-                if inventaire.cles > 0:
-                    return False
-    
-    # Si aucune issue trouvée, le joueur est bloqué.
-    return True 
-
 # === LOGIQUE DE JEU PRINCIPALE ===
 
 def handle_move(direction):
-    global choix_en_cours, pieces_proposees, index_selection, intended_dir, message_action, inventaire, player_pos, grid, game_over, generateur_alea
+    global choix_en_cours, pieces_proposees, index_selection, intended_dir, message_action, inventaire, player_pos, grid, game_over
     dy, dx = direction
     current_r, current_c = player_pos
     target_r, target_c = current_r + dy, current_c + dx
-    
     direction_map = {(-1, 0): "N", (1, 0): "S", (0, -1): "O", (0, 1): "E"}
     dir_key = direction_map.get(direction)
     
@@ -695,24 +736,14 @@ def handle_move(direction):
     
     if not in_bounds(target_r, target_c):
         message_action = "Mur extérieur : Limite du manoir atteinte."
-        # Vérification si cette tentative de mouvement non-valide aurait dû révéler un blocage complet
-        if check_for_blockade(current_r, current_c, inventaire, catalogue_pieces):
-            message_action = "💀 Défaite : Vous êtes complètement bloqué. Plus de chemins disponibles ou manquants de ressources clés/pièces."
-            game_over = True
         return False
-        
     current_room = grid[current_r][current_c]
     if current_room and current_room.get("porte", {}).get(dir_key) is not True:
         message_action = f"Mur interne : La salle '{current_room['nom']}' n'a pas de porte vers {dir_key}."
-        # Vérification si cette tentative de mouvement non-valide aurait dû révéler un blocage complet
-        if check_for_blockade(current_r, current_c, inventaire, catalogue_pieces):
-            message_action = "💀 Défaite : Vous êtes complètement bloqué. Plus de chemins disponibles ou manquants de ressources clés/pièces."
-            game_over = True
         return False
         
     target_room = grid[target_r][target_c]
     
-    # Dépenser le pas (sera remboursé en cas d'échec de l'ouverture de porte)
     inventaire.depenser_pas(1)
     if inventaire.pas <= 0:
         message_action = "💀 Défaite : vous n'avez plus de pas!"
@@ -721,96 +752,33 @@ def handle_move(direction):
         return False 
 
     if target_room is not None:
-        # Déplacement vers une salle existante (Mouvement réussi)
         player_pos[0], player_pos[1] = target_r, target_c
         message_action = f"Déplacement vers {target_room['nom']} ({inventaire.pas} pas restants)."
         process_room_entry(target_room)
-        
-        # VÉRIFICATION DE BLOCAGE (Après l'entrée dans une pièce)
-        r, c = player_pos
-        if check_for_blockade(r, c, inventaire, catalogue_pieces):
-            message_action = "💀 Défaite : Vous êtes complètement bloqué. Plus de chemins disponibles ou manquants de ressources clés/pièces."
-            game_over = True
-            return False
-        
         return True
     else:
-        # Ouverture d'une nouvelle porte (vérification de verrouillage)
-
-        # 1. DÉTERMINER LE NIVEAU DE VERROUILLAGE (Logique fixe par rangée)
-        niveau_verrouillage = generateur_alea.tirer_niveau_verrouillage(target_r)
-
-        cle_utilisee = False
-        kit_crochetage_utilise = False
-        
-        if niveau_verrouillage == 0:
-            message_action = "Porte déverrouillée (Niveau 0). Vous pouvez continuer."
-            pass
-        elif niveau_verrouillage == 1:
-            # Porte verrouillée simple (Niveau 1)
-            if inventaire.possede_kit_crochetage: 
-                kit_crochetage_utilise = True
-                message_action = "Porte verrouillée simple (Niveau 1).\nKit de Crochetage utilisé pour l'ouvrir!."
-            elif inventaire.cles > 0:
-                inventaire.retirer_cle(1)
-                cle_utilisee = True
-                message_action = "Porte verrouillée simple (Niveau 1).\n🔑 Clé dépensée pour l'ouvrir!."
-            else:
-                # Échec de l'ouverture
-                message_action = "Porte verrouillée simple (Niveau 1)! Nécessite 🔑 ou Kit de Crochetage."
-                inventaire.gagner_pas(1) # Rembourser le pas
-                
-                # VÉRIFICATION DE BLOCAGE APRES L'ÉCHEC
-                if check_for_blockade(current_r, current_c, inventaire, catalogue_pieces):
-                    message_action = "💀 Défaite : Vous êtes bloqué. Plus de chemins disponibles ou manquants de ressources clés/pièces."
-                    game_over = True
-                return False
-                
-        elif niveau_verrouillage == 2:
-            # Porte verrouillée à double tour (Niveau 2)
-            if inventaire.cles > 0:
-                inventaire.retirer_cle(1)
-                cle_utilisee = True
-                message_action = "Porte verrouillée double tour (Niveau 2).\n🔑 Clé dépensée pour l'ouvrir!."
-            else:
-                # Échec de l'ouverture
-                message_action = "Porte verrouillée double tour (Niveau 2)! Nécessite 🔑."
-                inventaire.gagner_pas(1) # Rembourser le pas
-                
-                # VÉRIFICATION DE BLOCAGE APRES L'ÉCHEC
-                if check_for_blockade(current_r, current_c, inventaire, catalogue_pieces):
-                    message_action = "💀 Défaite : Vous êtes bloqué. Plus de chemins disponibles ou manquants de ressources clés/pièces."
-                    game_over = True
-                return False
-        
-        # 2. La porte est ouverte. On procède au tirage de pièce.
-
         if not catalogue_pieces:
-            message_action += "\nImpasse... La pioche est vide."
-            inventaire.gagner_pas(1) # Rembourser le pas
+            message_action = "Impasse... La pioche est vide."
             game_over = True
             return False
             
         pieces_proposees.clear()
         
-        # DÉTERMINER LA DIRECTION CIBLE
+        # 1. DÉTERMINER LA DIRECTION CIBLE (celle du mouvement tenté)
         dir_cible = direction_map.get(direction)
         
-        # TIRER LES PIÈCES (via la méthode de l'instance GenerateurAlea)
-        pieces_proposees.extend(generateur_alea.tirer_pieces(catalogue_pieces, n=3, dir_cible=dir_cible))
+        # 2. TIRER LES PIÈCES AVEC LE BOOST (pour garantir les sorties NORD)
+        pieces_proposees.extend(tirer_pieces(catalogue_pieces, n=3, dir_cible=dir_cible))
         
         if not pieces_proposees:
-            message_action += "\nImpasse... La pioche est vide."
-            inventaire.gagner_pas(1) # Rembourser le pas
+            message_action = "Impasse... La pioche est vide."
             game_over = True
             return False
                  
         index_selection = 0
         choix_en_cours = True
         intended_dir = direction
-        
-        # Le message final de sélection est affiché après le message d'ouverture de porte
-        message_action += "\nSélectionnez une nouvelle pièce." 
+        message_action = "Sélectionnez une nouvelle pièce."
         return True
 
 def place_selected_piece(idx):
@@ -843,7 +811,7 @@ def place_selected_piece(idx):
         choix_en_cours = False
         intended_dir = None
         return False
-   
+    
     piece_dict = piece_info
 
     direction_map = {(-1, 0): "N", (1, 0): "S", (0, -1): "O", (0, 1): "E"}
@@ -938,6 +906,7 @@ while True:
                 if help_button_rect.collidepoint(mouse_pos):
                     choix_en_cours = False
                     message_action = "AIDE: Déplacez-vous avec ZQSD ou les flèches.\nTrouvez l'Antichambre pour gagner."
+
             if event.type == pygame.KEYDOWN:
                 if choix_en_cours:
                     if event.key in (pygame.K_UP, pygame.K_z):
@@ -958,14 +927,13 @@ while True:
                             direction_map = {(-1, 0): "N", (1, 0): "S", (0, -1): "O", (0, 1): "E"}
                             dir_cible = direction_map.get(intended_dir)
 
-                            # Relancer le tirage via l'instance GenerateurAlea
-                            pieces_proposees.extend(generateur_alea.tirer_pieces(catalogue_pieces, n=3, dir_cible=dir_cible))
+                            # Relancer le tirage avec le catalogue complet et le boost stratégique (via tirer_pieces)
+                            pieces_proposees.extend(tirer_pieces(catalogue_pieces, n=3, dir_cible=dir_cible))
                             index_selection = 0
                             message_action = f"Dé utilisé! Nouveau tirage de pièces ({inventaire.des} dés restants)."
                         else:
                             message_action = "Vous n'avez pas de dés pour relancer le tirage."
                     # --- FIN LOGIQUE ---
-        
                     
                     elif event.key == pygame.K_ESCAPE:
                         choix_en_cours = False; intended_dir = None; message_action = "Sélection annulée."
@@ -974,7 +942,6 @@ while True:
                     if event.key == pygame.K_ESCAPE:
                         pygame.quit(); sys.exit()
                         
-              
                     if event.key in (pygame.K_z, pygame.K_UP):
                         selected_move_direction = (-1, 0)
                         message_action = "Direction HAUT sélectionnée. Appuyez sur Espace."
@@ -1010,7 +977,6 @@ while True:
         draw_grid()
         draw_inventory(inventaire)
         draw_win_screen()
-        
         
     else: # Le jeu est en cours
         screen.fill(BLUEPRINT_BG)

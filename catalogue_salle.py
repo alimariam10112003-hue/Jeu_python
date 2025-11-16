@@ -12,7 +12,7 @@ def creer_salles_bleues():
             rarete=0, 
             condition_placement="Aucune",
             porte={"N": True, "S": True, "E": False, "O": False}, 
-            objets_initiaux=[], 
+            objets_initiaux=["Pomme", "Gem", "Key"], 
             effet=None,
             default_entry_direction="S"),
 
@@ -24,8 +24,8 @@ def creer_salles_bleues():
             rarete=0, 
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": False, "O": True}, 
-            objets_initiaux=["Wind-up Key"], 
-            effet="Puzzle: Gagne 3 gemmes en résolvant le puzzle",
+            objets_initiaux=["Gem", "Dé", "Gem"], 
+            effet=None, 
             default_entry_direction="S"),
 
         Salle(
@@ -36,8 +36,8 @@ def creer_salles_bleues():
             rarete=0,
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": False, "O": False}, 
-            objets_initiaux=["Banane", "Key"],
-            effet="Contient 2 objets aléatoire",
+            objets_initiaux=["Banane", "Key", "Gem"],
+            effet=None, 
             default_entry_direction="S"),
 
         
@@ -49,8 +49,8 @@ def creer_salles_bleues():
             rarete=0, 
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": False, "O": True}, 
-            objets_initiaux=["Key", "Gem", "Coin"], 
-            effet="Contient 1 key, 1 gem et 1 coin",
+            objets_initiaux=["Key", "Gem", "Dé"], 
+            effet=None,
             default_entry_direction="S"),
 
         Salle(
@@ -61,8 +61,8 @@ def creer_salles_bleues():
             rarete=0, 
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": False, "O": True}, 
-            objets_initiaux=["4 Coins", "Random Food"], 
-            effet="Contient 4 Coins et 1 objet Nourriture.",
+            objets_initiaux=["4 Coins", "Random Food", "Gem"], 
+            effet=None, 
             default_entry_direction="S"),
         
         # 4 de rareté 1
@@ -74,7 +74,7 @@ def creer_salles_bleues():
             rarete=1, 
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": False, "O": True}, 
-            objets_initiaux=["Redbul"], 
+            objets_initiaux=["Redbul", "Gem", "Gem"],
             effet=None,
             default_entry_direction="S"),
 
@@ -87,8 +87,8 @@ def creer_salles_bleues():
             rarete=1, 
             condition_placement="Aucune",
             porte={"N": True, "S": True, "E": False, "O": False}, 
-            objets_initiaux=["8 coins"], 
-            effet="Alzara: 1 coin contre une prédiction sur l'avenir ",
+            objets_initiaux=["8 Coins", "Gem"], 
+            effet=None, 
             default_entry_direction="S"),
 
         
@@ -100,7 +100,7 @@ def creer_salles_bleues():
             rarete=1, 
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": False, "O": True}, 
-            objets_initiaux=["Redbul"], 
+            objets_initiaux=["Redbul", "Key", "Gem"], 
             effet=None,
             default_entry_direction="S"),
 
@@ -112,8 +112,8 @@ def creer_salles_bleues():
             rarete=1, 
             condition_placement="",
             porte={"N": False, "S": True, "E": False, "O": False}, 
-            objets_initiaux=["Casiers"], 
-            effet="Casiers avec des consommables. Risque élevé de perdre 10 pas à l'entrée",
+            objets_initiaux=["Key", "Gem", "Chocolat"], 
+            effet=None, 
             default_entry_direction="S"),
 
         # 5 de rareté 2
@@ -125,7 +125,7 @@ def creer_salles_bleues():
             rarete=2, 
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": False, "O": True}, 
-            objets_initiaux=["Key"], 
+            objets_initiaux=["Key", "Gem"], 
             effet=None,
             default_entry_direction="S"),
 
@@ -137,8 +137,8 @@ def creer_salles_bleues():
             rarete=2, 
             condition_placement="Centrale",
             porte={"N": True, "S": True, "E": True, "O": True}, 
-            objets_initiaux=[], 
-            effet="Rotation de la pièce",
+            objets_initiaux=["Gem", "Gem", "Gem"], 
+            effet=None, 
             default_entry_direction="S"),
 
         Salle(
@@ -149,8 +149,8 @@ def creer_salles_bleues():
             rarete=2, 
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": False, "O": False}, 
-            objets_initiaux=["8 items random"], 
-            effet="Contient 8 objets aléatoire",
+            objets_initiaux=["Key", "Key", "Gem", "Sandwich"], 
+            effet=None,
             default_entry_direction="S"),
 
         
@@ -162,8 +162,9 @@ def creer_salles_bleues():
             rarete=2, 
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": False, "O": True}, 
-            objets_initiaux=[], 
-            effet="Récompense en fonction du nombre de trophées collectés.",
+            objets_initiaux=["10 Coins", "Gem", "Gem", "Gâteau"], 
+            effet=None, 
+
             default_entry_direction="S"),
 
         Salle(
@@ -174,8 +175,8 @@ def creer_salles_bleues():
             rarete=2, 
             condition_placement="",
             porte={"N": False, "S": True, "E": False, "O": False}, 
-            objets_initiaux=["40 coins"], 
-            effet="Contient des coffres",
+            objets_initiaux=["40 Coins"], 
+            effet=None, 
             default_entry_direction="S"),
         
         # 4 de rareté 3
@@ -187,8 +188,8 @@ def creer_salles_bleues():
             rarete=3, 
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": True, "O": True}, 
-            objets_initiaux=[], 
-            effet="Les objets dispercées dans le Manoir sont regroupés ici à la place",
+            objets_initiaux=["Gem", "Gem", "Key", "Repas"], 
+            effet=None, 
             default_entry_direction="S"),
 
         Salle(
@@ -199,8 +200,8 @@ def creer_salles_bleues():
             rarete=3, 
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": False, "O": True}, 
-            objets_initiaux=["Tank"], 
-            effet="L'utilisation du véhicule donne un hammer mais coûte des pas",
+            objets_initiaux=["Marteau"], 
+            effet=None,
             default_entry_direction="S"),
 
         
@@ -212,8 +213,8 @@ def creer_salles_bleues():
             rarete=3, 
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": True, "O": True}, 
-            objets_initiaux=[], 
-            effet="Les objets dispercées dans le Manoir sont regroupés ici à la place",
+            objets_initiaux=["Gem", "Key", "Key", "Repas"], 
+            effet=None, 
             default_entry_direction="S"),
 
 
@@ -225,8 +226,8 @@ def creer_salles_bleues():
             rarete=3, 
             condition_placement="",
             porte={"N": False, "S": True, "E": False, "O": False}, 
-            objets_initiaux=["Wine bottles"], 
-            effet="Le joueur peut consommer du vin. Chaque consommation côut 3 pas et donne 1 coin",
+            objets_initiaux=["10 Coins", "Sandwich"], 
+            effet=None, 
             default_entry_direction="S"),
     ]
     return salles_bleues
@@ -242,8 +243,8 @@ def creer_salles_verte():
             rarete=1, 
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": False, "O": False}, 
-            objets_initiaux=["Items random"], 
-            effet="Rend toutes les salles vertes gratuites à tirer.",
+            objets_initiaux=["Kit de Crochetage", "Patte de Lapin", "Gem"], 
+            effet=None,
             default_entry_direction="S"),
 
         Salle(
@@ -254,8 +255,8 @@ def creer_salles_verte():
             rarete=1, 
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": False, "O": True}, 
-            objets_initiaux=["Trou à Creuser"], 
-            effet="Disperse 3 coins aléatoirement dans des salles découvertes",
+            objets_initiaux=["Coin", "Coin", "Coin"], 
+            effet=None,
             default_entry_direction="S"),
 
         
@@ -267,8 +268,8 @@ def creer_salles_verte():
             rarete=1, 
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": True, "O": True}, 
-            objets_initiaux=["Trou à Creuser","Items random"], 
-            effet="Permet d'échnange 1 coin contre 1 gemme avec l'arrosoir",
+            objets_initiaux=["Gem", "Key", "Pomme"], 
+            effet=None,
             default_entry_direction="S"),
 
         Salle(
@@ -279,8 +280,8 @@ def creer_salles_verte():
             rarete=3, 
             condition_placement="Centre du Manoir",
             porte={"N": True, "S": True, "E": True, "O": True}, 
-            objets_initiaux=["Puzzle"], 
-            effet="Coût réduit à 9 si la pièce Terrace est présente",
+            objets_initiaux=["Dé", "Repas"], 
+            effet=None,
             default_entry_direction="S"),
 
         Salle(
@@ -291,10 +292,10 @@ def creer_salles_verte():
             rarete=3, 
             condition_placement="",
             porte={"N": True, "S": True, "E": False, "O": False}, 
-            objets_initiaux=["Items random"], 
-            effet="Augmente la probabilité de trouver des objets dans les pièces vertes suivante",
+            objets_initiaux=["Détecteur de Métaux", "Gem"], 
+            effet=None,
             default_entry_direction="S"),] 
-    return salles_verte 
+    return salles_verte
 
 def creer_salles_viollette():
     salles_viollette = [
@@ -306,7 +307,7 @@ def creer_salles_viollette():
             rarete=1, 
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": False, "O": True}, 
-            objets_initiaux=["Items food random"], 
+            objets_initiaux=["Random Food"], 
             effet="Gagne aléatoirement 1 à 5 pas.",
             default_entry_direction="S"),
 
@@ -318,8 +319,8 @@ def creer_salles_viollette():
             rarete=2, 
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": False, "O": True}, 
-            objets_initiaux=["Coffre fort à code"], 
-            effet="Ouverture du coffre fort donne des gems aléatoirement entre 1 et 3",
+            objets_initiaux=["Gem", "Gem"], 
+            effet=None,
             default_entry_direction="S"),
 
         
@@ -331,8 +332,8 @@ def creer_salles_viollette():
             rarete=1, 
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": False, "O": False}, 
-            objets_initiaux=["Items food random"], 
-            effet="Permet de gagner un dé à l'entrée",
+            objets_initiaux=["Random Food", "Dé"], 
+            effet=None,
             default_entry_direction="S"),
 
         Salle(
@@ -343,8 +344,8 @@ def creer_salles_viollette():
             rarete=0, 
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": False, "O": False}, 
-            objets_initiaux=["Key ou Nourriture"], 
-            effet="Gagne aléatoirement des pas",
+            objets_initiaux=["Key", "Random Food"], 
+            effet="Gagne aléatoirement 1 à 5 pas.",
             default_entry_direction="S"),
 
         Salle(
@@ -355,9 +356,23 @@ def creer_salles_viollette():
             rarete=0, 
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": False, "O": False}, 
-            objets_initiaux=["Key ou Nourriture"], 
-            effet="Gagne aléatoirement des pas",
-            default_entry_direction="S"),] 
+            objets_initiaux=["Key", "Random Food"], 
+            effet="Gagne aléatoirement 1 à 5 pas.",
+            default_entry_direction="S"),
+        
+        Salle(
+            nom="Guest Bedroom",
+            couleur="viollette",
+            image_path="img/guest_bedroom.png", 
+            cout_gem=0,
+            rarete=1, 
+            condition_placement="Aucune",
+            porte={"N": False, "S": True, "E": False, "O": False}, 
+            objets_initiaux=["Random Food", "Dé"], 
+            effet=None,
+            default_entry_direction="S"),
+        
+        ] 
     return salles_viollette
 
 def creer_salles_orange():
@@ -370,8 +385,8 @@ def creer_salles_orange():
             rarete=0, 
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": True, "O": True}, 
-            objets_initiaux=[], 
-            effet="Les portes sont toujours déverrouillées",
+            objets_initiaux=["Pomme"], 
+            effet=None,
             default_entry_direction="S"),
 
         Salle(
@@ -382,8 +397,8 @@ def creer_salles_orange():
             rarete=1, 
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": True, "O": True}, 
-            objets_initiaux=[], 
-            effet="Les portes sont toujours déverrouillées",
+            objets_initiaux=["Chocolat"], 
+            effet=None,
             default_entry_direction="S"),
 
         
@@ -395,8 +410,8 @@ def creer_salles_orange():
             rarete=0, 
             condition_placement="Aucune",
             porte={"N": True, "S": True, "E": False, "O": False}, 
-            objets_initiaux=[], 
-            effet="les pièces sont toujours déverrouillées",
+            objets_initiaux=["Banane"], 
+            effet=None,
             default_entry_direction="S"),
 
         Salle(
@@ -407,8 +422,8 @@ def creer_salles_orange():
             rarete=1, 
             condition_placement="Aucune",
             porte={"N": True, "S": True, "E": True, "O": True}, 
-            objets_initiaux=["Key ou Nourriture"], 
-            effet="Les portes sont toujours déverrouillées",
+            objets_initiaux=["Key", "Random Food"], 
+            effet=None,
             default_entry_direction="S"),
 
         Salle(
@@ -419,8 +434,8 @@ def creer_salles_orange():
             rarete=3, 
             condition_placement="Aucune",
             porte={"N": True, "S": True, "E": True, "O": True}, 
-            objets_initiaux=[], 
-            effet="Contient 7 portes toujours verouillées. Toutes les portes sont déverouillées si le Foyer est dans le Manoir",
+            objets_initiaux=["Gem", "Gem", "Key", "Sandwich"], 
+            effet=None,
             default_entry_direction="S"),] 
     return salles_orange
 
@@ -434,8 +449,8 @@ def creer_salles_jaune():
             rarete=1, 
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": False, "O": True}, 
-            objets_initiaux=["Vente de key et item"], 
-            effet="Permet d'aquérir des items ou keys contre des coins",
+            objets_initiaux=["Key", "Sandwich"], 
+            effet=None,
             default_entry_direction="S"),
 
         Salle(
@@ -446,8 +461,8 @@ def creer_salles_jaune():
             rarete=1, 
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": False, "O": True}, 
-            objets_initiaux=["Vente food"], 
-            effet="Permet d'aquérir des items food contre des coins",
+            objets_initiaux=["Repas", "Pomme"], 
+            effet=None,
             default_entry_direction="S"),
 
         
@@ -459,8 +474,8 @@ def creer_salles_jaune():
             rarete=3, 
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": False, "O": False}, 
-            objets_initiaux=["Vente key et lockpick kits"], 
-            effet="Permet d'aquérir des keys ou des kits de crochetage",
+            objets_initiaux=["Key", "Kit de Crochetage"], 
+            effet=None,
             default_entry_direction="S"),
 
         Salle(
@@ -471,8 +486,8 @@ def creer_salles_jaune():
             rarete=2, 
             condition_placement="Aucune",
             porte={"N": True, "S": True, "E": False, "O": False}, 
-            objets_initiaux=["Vente items permanents"], 
-            effet="Permet d'aquérir des items permanents",
+            objets_initiaux=["10 Coins", "Gem", "Gem"], 
+            effet=None,
             default_entry_direction="S"),
 
         Salle(
@@ -483,8 +498,8 @@ def creer_salles_jaune():
             rarete=3, 
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": False, "O": True}, 
-            objets_initiaux=["Vente books"], 
-            effet="Permet d'acquérir des livres",
+            objets_initiaux=["Dé", "Dé", "Gem"], 
+            effet=None,
             default_entry_direction="S"),] 
     return salles_jaune
 
@@ -498,8 +513,8 @@ def creer_salles_rouge():
             rarete=1, 
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": False, "O": False}, 
-            objets_initiaux=["Random key ou food item"], 
-            effet="Peut donner des pas ou des dés",
+            objets_initiaux=["Pomme"], 
+            effet="Perte de 2 pas",
             default_entry_direction="S"),
 
         Salle(
@@ -511,7 +526,7 @@ def creer_salles_rouge():
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": True, "O": True}, 
             objets_initiaux=[], 
-            effet="Perd 1 coin à chaque entrée. Briser l'hôtel permets de récupérer les coins perdus (usage unique) ",
+            effet="Perte de 1 coin", 
             default_entry_direction="S"),
 
         
@@ -524,7 +539,7 @@ def creer_salles_rouge():
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": True, "O": True}, 
             objets_initiaux=[], 
-            effet="Perte de 5 pas à chaque entrée dans la salle. Peut contenir une key ou un dé",
+            effet="Perte de 5 pas", 
             default_entry_direction="S"),
 
         Salle(
@@ -536,7 +551,7 @@ def creer_salles_rouge():
             condition_placement="Aucune",
             porte={"N": True, "S": True, "E": True, "O": True}, 
             objets_initiaux=[], 
-            effet="Permet d'échanger 5 pas cpntre 1 dé. Perte de la moitié des pas",
+            effet="Perte de 8 pas",
             default_entry_direction="S"),
 
         Salle(
@@ -547,7 +562,7 @@ def creer_salles_rouge():
             rarete=2, 
             condition_placement="Aucune",
             porte={"N": False, "S": True, "E": False, "O": True}, 
-            objets_initiaux=["Vente books"], 
-            effet="Augmente la probabilité de tirer d'autres salles rouge",
+            objets_initiaux=[], 
+            effet="Perte de 1 Gem", 
             default_entry_direction="S"),] 
     return salles_rouge
