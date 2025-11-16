@@ -89,8 +89,10 @@ class Inventaire:
         
     def retirer_coin(self, quantite: int = 1) -> bool:
         """
-        Tente de dépenser une ou plusieurs pièces (coin).
-        Retourne True si la dépense est réussie, False sinon.
+        Déduit le nombre de pièces d'or spécifié. [cite_start]Utilisé pour dépenser de l'or dans les magasins. [cite: 48, 98]
+
+        :param quantite: Nombre de pièces d'or à retirer (défaut: 1).
+        :return: True si la dépense est réussie, False sinon (pièces d'or insuffisantes).
         """
         if self.coin >= quantite:
             self.coin -= quantite
@@ -98,29 +100,28 @@ class Inventaire:
         return False
         
     def gagner_coin(self, quantite: int = 1):
-        """Ajoute une ou plusieurs pièces (coin) à l'inventaire."""
+        """Ajoute des pièces d'or à l'inventaire du joueur."""
         self.coin += quantite
 
 class Joueur:
     """
-    Initialisation de la classe "Joueur" qui représente le personnage
-    dans le jeu et gère sa position et son inventaire.
+    Représente l'entité du joueur dans le jeu. 
+    Contient l'inventaire (Inventaire) et la position actuelle dans la grille du manoir.
     """
-
     def __init__(self, position_depart: tuple = (8, 2)):
-        
         """
-        Initialisation du joueur.
-        
-        * position_depart: Coordonnées initiales du joueur (par défaut (8, 2)).
-        """
+        Initialise le joueur à la position de départ par défaut (l'Entrance Hall)
+        et crée son inventaire.
 
+        :param position_depart: Tuple (ligne, colonne) de la position initiale du joueur.
+        """
         self.position = position_depart
         self.inventaire = Inventaire() # Crée une instance de l'inventaire
         
     def deplacement(self) -> bool:
         """
-        Tente de déplacer le joueur en consommant un pas de l'inventaire.
-        Retourne True si le pas a été dépensé (déplacement possible), False sinon.
+        Tente de consommer un pas via l'inventaire pour effectuer un mouvement.
+
+        :return: True si le pas a été dépensé avec succès, False si les pas sont épuisés.
         """
         return self.inventaire.depenser_pas(1)

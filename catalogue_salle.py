@@ -1,6 +1,18 @@
 from salle import Salle
 from salles_speciales import EntranceHall, Antechamber
 
+"""
+    Crée et retourne une liste d'instances de la classe Salle pour toutes les pièces 
+    de couleur 'bleue' du manoir.
+
+    Chaque instance de Salle est configurée avec ses attributs spécifiques : 
+    nom, niveau de rareté, coût en gemmes, configuration des portes 
+    (portes disponibles en N, S, E, O), et effets initiaux (objets_initiaux) 
+    qui seront traités lors de l'entrée dans la salle.
+    
+    :return: Une liste [Salle, Salle, ...] représentant toutes les pièces bleues disponibles dans la pioche.
+    """
+
 def creer_salles_bleues():
     salles_bleues = [
         # 5 de niveau de rareté 0
